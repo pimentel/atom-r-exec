@@ -1,0 +1,25 @@
+{
+  "name": "r-exec",
+  "main": "./lib/r-exec",
+  "version": "0.0.0",
+  "description": "Send R code to various R consoles",
+  "activationEvents": [
+    "r-exec:send-to-r-app",
+    "r-exec:send-to-terminal",
+    "r-exec:send-to-rstudio-server"
+  ],
+  "repository": "https://github.com/hafen/atom-r-exec",
+  "keywords": [
+    "R",
+    "code",
+    "run",
+    "runner"
+  ],
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "dependencies": {
+    "node-osascript": "1.0.0"
+  }
+}

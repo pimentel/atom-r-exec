@@ -1,0 +1,4 @@
+.DS_Store
+.Rapp.history
+npm-debug.log
+node_modules
