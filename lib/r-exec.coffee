@@ -3,18 +3,21 @@ String::addSlashes = ->
 
 module.exports =
   activate: ->
-    atom.workspaceView.command "r-exec:send-to-r-app", => @rapp()
-    atom.workspaceView.command "r-exec:send-to-terminal", => @terminal()
-    atom.workspaceView.command "r-exec:send-to-rstudio-server", => @rstudioserver()
+    atom.commands.add 'atom-workspace',
+      'r-exec:send-to-r-app', => @rapp()
+    atom.commands.add 'atom-workspace',
+      'r-exec:send-to-terminal', => @terminal()
+    atom.commands.add 'atom-workspace',
+      'r-exec:send-to-rstudio-server', => @rstudioserver()
 
   rapp: ->
     # This assumes the active pane item is an editor
-    selection = atom.workspace.getActiveEditor().getSelection()
+    selection = atom.workspace.getActiveTextEditor().getLastSelection()
     if selection.getText().addSlashes() == ""
-      atom.workspace.getActiveEditor().selectLine()
-      selection = atom.workspace.getActiveEditor().getSelection()
+      atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
+      selection = atom.workspace.getActiveTextEditor().getLastSelection()
 
-    path = atom.project.getPath()
+    path = atom.project.getPaths()
     if(path == undefined)
       path = ""
     else
@@ -29,10 +32,10 @@ module.exports =
 
   terminal: ->
     # This assumes the active pane item is an editor
-    selection = atom.workspace.getActiveEditor().getSelection()
+    selection = atom.workspace.getActiveTextEditor().getLastSelection()
     if selection.getText().addSlashes() == ""
-      atom.workspace.getActiveEditor().selectLine()
-      selection = atom.workspace.getActiveEditor().getSelection()
+      atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
+      selection = atom.workspace.getActiveTextEditor().getLastSelection()
     osascript = require 'node-osascript'
     osascript.execute "tell application \"Terminal\" to activate\ntell application \"Terminal\"\ndo script code in window 1\nend tell", {code: selection.getText().addSlashes()}, (error, result, raw) ->
       if error
@@ -42,10 +45,10 @@ module.exports =
 
   rstudioserver: ->
     # This assumes the active pane item is an editor
-    selection = atom.workspace.getActiveEditor().getSelection()
+    selection = atom.workspace.getActiveTextEditor().getLastSelection()
     if selection.getText().addSlashes() == ""
-      atom.workspace.getActiveEditor().selectLine()
-      selection = atom.workspace.getActiveEditor().getSelection()
+      atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
+      selection = atom.workspace.getActiveTextEditor().getLastSelection()
     osascript = require 'node-osascript'
     atom.clipboard.write selection.getText()
     osascript.execute "tell application \"Safari\" to activate\ndelay 0.5\ntell application \"System Events\" to tell process \"Safari\" to keystroke \"v\" using {command down}\ndelay 0.1\ntell application \"System Events\" to tell process \"Safari\" to keystroke return", (error, result, raw) ->
@@ -55,7 +58,7 @@ module.exports =
         console.log result, raw
 
 
-atom.project.getPath()
+atom.project.getPaths()
 
 # tell application "R" to activate
 # if (item 2 of theCode) is not "" then tell application "R" to cmd "setwd(\"" & (item 2 of theCode) & "\")"
