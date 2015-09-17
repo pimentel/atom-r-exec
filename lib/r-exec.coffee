@@ -9,6 +9,19 @@ module.exports =
       'r-exec:send-to-terminal', => @terminal()
     atom.commands.add 'atom-workspace',
       'r-exec:send-to-rstudio-server', => @rstudioserver()
+    atom.commands.add 'atom-workspace',
+      'r-exec:rapp-setwd', => @rappswd()
+
+  rappswd: ->
+    cwd = atom.workspace.getActiveTextEditor().getPath()
+    cwd = cwd.substring(0, cwd.lastIndexOf('/'))
+    cwd = "setwd(\"" + cwd + "\")"
+    osascript = require 'node-osascript'
+    osascript.execute "tell application \"R\" to activate\ntell application \"R\" to cmd setwd", {setwd: cwd.addSlashes()}, (error, result, raw) ->
+      if error
+        console.error(error)
+      else
+        console.log result, raw
 
   rapp: ->
     # This assumes the active pane item is an editor
