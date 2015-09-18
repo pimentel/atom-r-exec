@@ -24,7 +24,7 @@ module.exports =
       path = "setwd(\"" + path + "\")"
 
     osascript = require 'node-osascript'
-    osascript.execute "tell application \"R\" to activate\ntell application \"R\" to cmd setwd\ntell application \"R\" to cmd code", {setwd: path.addSlashes(), code: selection.getText().addSlashes()}, (error, result, raw) ->
+    osascript.execute "tell application \"R\" to activate\ntell application \"R\" to cmd code", {setwd: path.addSlashes(), code: selection.getText().addSlashes()}, (error, result, raw) ->
       if error
         console.error(error)
       else
