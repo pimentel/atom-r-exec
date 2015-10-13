@@ -15,6 +15,6 @@
   'cmd-shift-r': 'r-exec:send-to-r-app'
   'cmd-shift-t': 'r-exec:send-to-terminal'
   #'cmd-shift-e': 'r-exec:send-to-rstudio-server'
-  'cmd-shift-e': 'r-exec:rapp-setwd'
+  'cmd-shift-e': 'r-exec:setwd'
   'cmd-enter': 'r-exec:send-command'
   # 'cmd-enter': 'r-exec:send-to-r-app'

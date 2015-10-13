@@ -19,6 +19,8 @@ module.exports =
       'r-exec:rapp-setwd', => @rappswd()
     atom.commands.add 'atom-workspace',
       'r-exec:send-command',  => @sendCommand()
+    atom.commands.add 'atom-workspace',
+      'r-exec:setwd', => @setWorkingDirectory()
 
   sendCommand: ->
     selection = @getSelection()
@@ -39,15 +41,14 @@ module.exports =
     if selection.getText().addSlashes() == ""
       atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
       selection = atom.workspace.getActiveTextEditor().getLastSelection()
-
-    selection
+    selection.getText().addSlashes()
 
   setWorkingDirectory: ->
     cwd = atom.workspace.getActiveTextEditor().getPath()
     cwd = cwd.substring(0, cwd.lastIndexOf('/'))
     cwd = "setwd(\"" + cwd + "\")"
 
-    @sendCommand(cwd)
+    @sendCode(cwd.addSlashes())
 
   rappswd: ->
     cwd = atom.workspace.getActiveTextEditor().getPath()
@@ -63,7 +64,7 @@ module.exports =
   rapp: (selection) ->
     osascript = require 'node-osascript'
     # osascript.execute "tell application \"R\" to activate\ntell application \"R\" to cmd code", {setwd: path.addSlashes(), code: selection.getText().addSlashes()}, (error, result, raw) ->
-    osascript.execute "tell application \"R\" to cmd code", {code: selection.getText().addSlashes()}, (error, result, raw) ->
+    osascript.execute "tell application \"R\" to cmd code", {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
       else
@@ -95,7 +96,6 @@ module.exports =
         console.error(error)
       else
         console.log result, raw
-
 
 
 atom.project.getPaths()

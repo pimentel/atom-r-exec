@@ -8,7 +8,8 @@
       "r-exec:send-to-r-app",
       "r-exec:send-to-terminal",
       "r-exec:send-to-rstudio-server",
-      "r-exec:send-command"
+      "r-exec:send-command",
+      "r-exec:setwd"
     ]
   },
   "repository": "https://github.com/hafen/atom-r-exec",
