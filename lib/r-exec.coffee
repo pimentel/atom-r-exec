@@ -2,6 +2,12 @@ String::addSlashes = ->
   @replace(/[\\"']/g, "\\$&").replace /\u0000/g, "\\0"
 
 module.exports =
+  config:
+    whichEngine:
+      type: 'string'
+      default: 'R.app'
+      description: 'Which engine to send commands to. Valid engines are: R.app, Terminal, iTerm, and Safari.'
+
   activate: ->
     atom.commands.add 'atom-workspace',
       'r-exec:send-to-r-app', => @rapp()
@@ -11,6 +17,26 @@ module.exports =
       'r-exec:send-to-rstudio-server', => @rstudioserver()
     atom.commands.add 'atom-workspace',
       'r-exec:rapp-setwd', => @rappswd()
+    atom.commands.add 'atom-workspace',
+      'r-exec:send-command',  => @sendCommand()
+
+  sendCommand: ->
+    whichEngine = atom.config.get 'r-exec.whichEngine'
+    console.log 'r-exec.whichEngine: ', whichEngine
+
+    switch whichEngine
+      when 'R.app' then  @rapp()
+      when 'Safari' then  @rstudioserver()
+      else console.error('currently unsupported')
+
+  getSelection: ->
+    # get the current selection
+    selection = atom.workspace.getActiveTextEditor().getLastSelection()
+    if selection.getText().addSlashes() == ""
+      atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
+      selection = atom.workspace.getActiveTextEditor().getLastSelection()
+
+    selection
 
   rappswd: ->
     cwd = atom.workspace.getActiveTextEditor().getPath()
@@ -29,7 +55,8 @@ module.exports =
     if selection.getText().addSlashes() == ""
       atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
       selection = atom.workspace.getActiveTextEditor().getLastSelection()
-
+    whichEngine = atom.config.get "r-exec.whichEngine"
+    console.log 'whichEngine: ', whichEngine
     path = atom.project.getPaths()
     if(path == undefined)
       path = ""
@@ -37,7 +64,8 @@ module.exports =
       path = "setwd(\"" + path + "\")"
 
     osascript = require 'node-osascript'
-    osascript.execute "tell application \"R\" to activate\ntell application \"R\" to cmd code", {setwd: path.addSlashes(), code: selection.getText().addSlashes()}, (error, result, raw) ->
+    # osascript.execute "tell application \"R\" to activate\ntell application \"R\" to cmd code", {setwd: path.addSlashes(), code: selection.getText().addSlashes()}, (error, result, raw) ->
+    osascript.execute "tell application \"R\" to cmd code", {setwd: path.addSlashes(), code: selection.getText().addSlashes()}, (error, result, raw) ->
       if error
         console.error(error)
       else
@@ -69,6 +97,7 @@ module.exports =
         console.error(error)
       else
         console.log result, raw
+
 
 
 atom.project.getPaths()

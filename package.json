@@ -7,7 +7,8 @@
     "atom-text-editor": [
       "r-exec:send-to-r-app",
       "r-exec:send-to-terminal",
-      "r-exec:send-to-rstudio-server"
+      "r-exec:send-to-rstudio-server",
+      "r-exec:send-command"
     ]
   },
   "repository": "https://github.com/hafen/atom-r-exec",
