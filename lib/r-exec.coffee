@@ -37,7 +37,6 @@ module.exports =
     if advancePosition
       if not selection.anySelection
         currentPosition.row += 1
-      #currentPosition.column = 0
       atom.workspace.getActiveTextEditor().setCursorScreenPosition(currentPosition)
       atom.workspace.getActiveTextEditor().moveToFirstCharacterOfLine()
     else
@@ -54,8 +53,9 @@ module.exports =
       else console.error('currently unsupported')
 
   getSelection: ->
-    # get the current selection
-
+    # returns an object with keys:
+    # selection: the selection or line at which the cursor is present
+    # anySelection: if true, the user made a selection.
     selection = atom.workspace.getActiveTextEditor().getLastSelection()
     anySelection = true
 
@@ -68,6 +68,7 @@ module.exports =
     {selection: selection, anySelection: anySelection}
 
   setWorkingDirectory: ->
+    # set the current working directory to the directory of where the current file is
     cwd = atom.workspace.getActiveTextEditor().getPath()
     cwd = cwd.substring(0, cwd.lastIndexOf('/'))
     cwd = "setwd(\"" + cwd + "\")"

@@ -24,6 +24,6 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "node-osascript": "1.0.0"
+    "node-osascript": "1.0.2"
   }
 }
