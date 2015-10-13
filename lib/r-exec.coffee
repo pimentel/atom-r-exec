@@ -21,12 +21,16 @@ module.exports =
       'r-exec:send-command',  => @sendCommand()
 
   sendCommand: ->
+    selection = @getSelection()
+    @sendCode(selection)
+
+  sendCode: (code) ->
     whichEngine = atom.config.get 'r-exec.whichEngine'
     console.log 'r-exec.whichEngine: ', whichEngine
 
     switch whichEngine
-      when 'R.app' then  @rapp()
-      when 'Safari' then  @rstudioserver()
+      when 'R.app' then  @rapp(code)
+      when 'Safari' then  @rstudioserver(code)
       else console.error('currently unsupported')
 
   getSelection: ->
@@ -37,6 +41,13 @@ module.exports =
       selection = atom.workspace.getActiveTextEditor().getLastSelection()
 
     selection
+
+  setWorkingDirectory: ->
+    cwd = atom.workspace.getActiveTextEditor().getPath()
+    cwd = cwd.substring(0, cwd.lastIndexOf('/'))
+    cwd = "setwd(\"" + cwd + "\")"
+
+    @sendCommand(cwd)
 
   rappswd: ->
     cwd = atom.workspace.getActiveTextEditor().getPath()
@@ -49,23 +60,10 @@ module.exports =
       else
         console.log result, raw
 
-  rapp: ->
-    # This assumes the active pane item is an editor
-    selection = atom.workspace.getActiveTextEditor().getLastSelection()
-    if selection.getText().addSlashes() == ""
-      atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
-      selection = atom.workspace.getActiveTextEditor().getLastSelection()
-    whichEngine = atom.config.get "r-exec.whichEngine"
-    console.log 'whichEngine: ', whichEngine
-    path = atom.project.getPaths()
-    if(path == undefined)
-      path = ""
-    else
-      path = "setwd(\"" + path + "\")"
-
+  rapp: (selection) ->
     osascript = require 'node-osascript'
     # osascript.execute "tell application \"R\" to activate\ntell application \"R\" to cmd code", {setwd: path.addSlashes(), code: selection.getText().addSlashes()}, (error, result, raw) ->
-    osascript.execute "tell application \"R\" to cmd code", {setwd: path.addSlashes(), code: selection.getText().addSlashes()}, (error, result, raw) ->
+    osascript.execute "tell application \"R\" to cmd code", {code: selection.getText().addSlashes()}, (error, result, raw) ->
       if error
         console.error(error)
       else
