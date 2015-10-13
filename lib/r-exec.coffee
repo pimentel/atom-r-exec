@@ -10,7 +10,11 @@ module.exports =
     advancePosition:
       type: 'boolean'
       default: false
-      description: 'If true, the cursor advances to the after sending the current block/line'
+      description: 'If true, the cursor advances to the after sending the current block/line.'
+    focusWindow:
+      type: 'boolean'
+      default: false
+      description: 'If true, after code is sent, bring focus to where it was sent.'
 
   activate: ->
     atom.commands.add 'atom-workspace',
@@ -49,7 +53,7 @@ module.exports =
 
     switch whichEngine
       when 'R.app' then  @rapp(code)
-      when 'Safari' then  @rstudioserver(code)
+      #when 'Safari' then  @rstudioserver(code)
       else console.error('currently unsupported')
 
   getSelection: ->
@@ -88,8 +92,15 @@ module.exports =
 
   rapp: (selection) ->
     osascript = require 'node-osascript'
-    # osascript.execute "tell application \"R\" to activate\ntell application \"R\" to cmd code", {setwd: path.addSlashes(), code: selection.getText().addSlashes()}, (error, result, raw) ->
-    osascript.execute "tell application \"R\" to cmd code", {code: selection}, (error, result, raw) ->
+    command = []
+    focusWindow = atom.config.get 'r-exec.focusWindow'
+    if focusWindow
+      command.push 'tell application "R" to activate'
+    command.push 'tell application "R" to cmd code'
+    command = command.join('\n')
+
+    #osascript.execute "tell application \"R\" to cmd code", {code: selection}, (error, result, raw) ->
+    osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
       else
