@@ -1,5 +1,5 @@
 String::addSlashes = ->
-  @replace(/[\\"']/g, "\\$&").replace /\u0000/g, "\\0"
+  @replace(/[\\"]/g, "\\$&").replace /\u0000/g, "\\0"
 
 module.exports =
   config:
@@ -23,8 +23,6 @@ module.exports =
       'r-exec:send-to-terminal', => @terminal()
     atom.commands.add 'atom-workspace',
       'r-exec:send-to-rstudio-server', => @rstudioserver()
-    atom.commands.add 'atom-workspace',
-      'r-exec:rapp-setwd', => @rappswd()
     atom.commands.add 'atom-workspace',
       'r-exec:send-command',  => @sendCommand()
     atom.commands.add 'atom-workspace',
@@ -54,6 +52,7 @@ module.exports =
     switch whichEngine
       when 'R.app' then  @rapp(code)
       #when 'Safari' then  @rstudioserver(code)
+      when 'Terminal' then  @terminal(code)
       else console.error('currently unsupported')
 
   getSelection: ->
@@ -67,7 +66,9 @@ module.exports =
       anySelection = false
       atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
       selection = atom.workspace.getActiveTextEditor().getLastSelection()
+    console.log 'before: ', selection.getText()
     selection = selection.getText().addSlashes()
+    console.log 'after: ', selection
 
     {selection: selection, anySelection: anySelection}
 
@@ -79,17 +80,6 @@ module.exports =
 
     @sendCode(cwd.addSlashes())
 
-  rappswd: ->
-    cwd = atom.workspace.getActiveTextEditor().getPath()
-    cwd = cwd.substring(0, cwd.lastIndexOf('/'))
-    cwd = "setwd(\"" + cwd + "\")"
-    osascript = require 'node-osascript'
-    osascript.execute "tell application \"R\" to activate\ntell application \"R\" to cmd setwd", {setwd: cwd.addSlashes()}, (error, result, raw) ->
-      if error
-        console.error(error)
-      else
-        console.log result, raw
-
   rapp: (selection) ->
     osascript = require 'node-osascript'
     command = []
@@ -99,21 +89,25 @@ module.exports =
     command.push 'tell application "R" to cmd code'
     command = command.join('\n')
 
-    #osascript.execute "tell application \"R\" to cmd code", {code: selection}, (error, result, raw) ->
     osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
       else
         console.log result, raw
 
-  terminal: ->
+  terminal: (selection)->
     # This assumes the active pane item is an editor
-    selection = atom.workspace.getActiveTextEditor().getLastSelection()
-    if selection.getText().addSlashes() == ""
-      atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
-      selection = atom.workspace.getActiveTextEditor().getLastSelection()
     osascript = require 'node-osascript'
-    osascript.execute "tell application \"Terminal\" to activate\ntell application \"Terminal\"\ndo script code in window 1\nend tell", {code: selection.getText().addSlashes()}, (error, result, raw) ->
+    command = []
+    focusWindow = atom.config.get 'r-exec.focusWindow'
+    if focusWindow
+      command.push 'tell application "Terminal" to activate'
+    command.push 'tell application "Terminal"'
+    command.push 'do script code in window 1'
+    command.push 'end tell'
+    command = command.join('\n')
+
+    osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
       else
