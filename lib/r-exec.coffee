@@ -13,12 +13,10 @@ module.exports =
       description: 'If true, the cursor advances to the after sending the current block/line.'
     focusWindow:
       type: 'boolean'
-      default: false
+      default: true
       description: 'If true, after code is sent, bring focus to where it was sent.'
 
   activate: ->
-    atom.commands.add 'atom-workspace',
-      'r-exec:send-to-rstudio-server', => @rstudioserver()
     atom.commands.add 'atom-workspace',
       'r-exec:send-command',  => @sendCommand()
     atom.commands.add 'atom-workspace',
@@ -134,7 +132,6 @@ module.exports =
     # This assumes the active pane item is an console
     osascript = require 'node-osascript'
 
-    # atom.clipboard.write selection.getText()
     atom.clipboard.write selection
     focusWindow = atom.config.get 'r-exec.focusWindow'
     command = []
@@ -157,17 +154,3 @@ module.exports =
 
 
 atom.project.getPaths()
-
-# tell application "R" to activate
-# if (item 2 of theCode) is not "" then tell application "R" to cmd "setwd(\"" & (item 2 of theCode) & "\")"
-# tell application "R" to cmd (item 1 of theCode)
-
-
-# tell application "iTerm"
-# 	tell the current terminal
-# 		activate current session
-# 		tell the last session
-# 			write text "print('hello world')"
-# 		end tell
-# 	end tell
-# end tell
