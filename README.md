@@ -15,12 +15,15 @@ Search for `r-exec` within package search in the Settings View.
 ### Keybindings
 
 While `cmd-enter` is bound to sending code in the package, it is also annoyingly bound to entering a new line by default in atom.
-In order to make it work, you must add the following binding in `~/keymap.cson`:
+In order to make it work, you must add the following binding in `~/.atom/keymap.cson`:
 
 ```javascript
 '.workspace .editor':
   'cmd-enter': 'r-exec:send-command'
 ```
+
+### Behavior
+
 In your global configuration file (`~/.atom/init.coffee`), you may set the following variables:
 
 - `r-exec.whichEngine` which R engine to use. Valid engines are:
