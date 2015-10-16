@@ -18,10 +18,6 @@ module.exports =
 
   activate: ->
     atom.commands.add 'atom-workspace',
-      'r-exec:send-to-r-app', => @rapp()
-    atom.commands.add 'atom-workspace',
-      'r-exec:send-to-terminal', => @terminal()
-    atom.commands.add 'atom-workspace',
       'r-exec:send-to-rstudio-server', => @rstudioserver()
     atom.commands.add 'atom-workspace',
       'r-exec:send-command',  => @sendCommand()
@@ -50,6 +46,7 @@ module.exports =
     console.log 'r-exec.whichEngine: ', whichEngine
 
     switch whichEngine
+      when 'iTerm' then @iterm(code)
       when 'R.app' then  @rapp(code)
       #when 'Safari' then  @rstudioserver(code)
       when 'Terminal' then  @terminal(code)
@@ -80,6 +77,28 @@ module.exports =
 
     @sendCode(cwd.addSlashes())
 
+  iterm: (selection) ->
+    osascript = require 'node-osascript'
+    command = []
+    focusWindow = atom.config.get 'r-exec.focusWindow'
+    if focusWindow
+      command.push 'tell application "iTerm" to activate'
+    command.push 'tell application "iTerm"'
+    command.push '  tell the current terminal'
+    command.push '    activate current session'
+    command.push '    tell the last session'
+    command.push '      write text code'
+    command.push '    end tell'
+    command.push '  end tell'
+    command.push 'end tell'
+    command = command.join('\n')
+    console.log command
+    osascript.execute command, {code: selection}, (error, result, raw) ->
+      if error
+        console.error(error)
+      else
+        console.log result, raw
+
   rapp: (selection) ->
     osascript = require 'node-osascript'
     command = []
@@ -95,7 +114,7 @@ module.exports =
       else
         console.log result, raw
 
-  terminal: (selection)->
+  terminal: (selection) ->
     # This assumes the active pane item is an editor
     osascript = require 'node-osascript'
     command = []
@@ -106,7 +125,7 @@ module.exports =
     command.push 'do script code in window 1'
     command.push 'end tell'
     command = command.join('\n')
-
+    console.log command
     osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
@@ -133,3 +152,13 @@ atom.project.getPaths()
 # tell application "R" to activate
 # if (item 2 of theCode) is not "" then tell application "R" to cmd "setwd(\"" & (item 2 of theCode) & "\")"
 # tell application "R" to cmd (item 1 of theCode)
+
+
+# tell application "iTerm"
+# 	tell the current terminal
+# 		activate current session
+# 		tell the last session
+# 			write text "print('hello world')"
+# 		end tell
+# 	end tell
+# end tell
