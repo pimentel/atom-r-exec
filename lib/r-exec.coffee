@@ -33,14 +33,13 @@ module.exports =
   sendCommand: ->
     whichApp = atom.config.get 'r-exec.whichApp'
     # we store the current position so that we can jump back to it later (if the user wants to)
-    currentPosition = atom.workspace.getActiveTextEditor().getCursorBufferPosition()
+    currentPosition = atom.workspace.getActiveTextEditor().getLastSelection().getScreenRange().end
     selection = @getSelection(whichApp)
     @sendCode(selection.selection, whichApp)
 
     advancePosition = atom.config.get 'r-exec.advancePosition'
     if advancePosition
-      if not selection.anySelection
-        currentPosition.row += 1
+      currentPosition.row += 1
       atom.workspace.getActiveTextEditor().setCursorScreenPosition(currentPosition)
       atom.workspace.getActiveTextEditor().moveToFirstCharacterOfLine()
     else
