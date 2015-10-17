@@ -24,23 +24,25 @@ In order to make it work, you must add the following binding in `~/.atom/keymap.
 
 ### Behavior
 
+All configuration can be done in the settings panel. Alternatively, you can edit your configuration file as noted below.
+
 In your global configuration file (`~/.atom/init.coffee`), you may set the following variables:
 
-- `r-exec.whichEngine` which R engine to use. Valid engines are:
+- `r-exec.whichApp` which R engine to use. Valid engines are:
   - `R.app`: the default (the R GUI)
   - `iTerm` or `Terminal`: Assumes the currently active terminal has R running
-  - `Safari`: assumes the currently active tab has an active RStudio session running, with the console active
+  - `Safari` or `Google Chrome`: assumes the currently active tab has an active RStudio session running, with the console active
 - `r-exec.advancePosition`
-  - if `true`, go to the after running the selection or current line
+  - if `true`, go to the after running the current line
   - if `false`, leave the cursor where it currently is
 - `r-exec.focusWindow`
   - if `true`, focus the window before sending code
-  - if `false`, send the code in the background and stay focused on Atom
+  - if `false`, send the code in the background and stay focused on Atom. This is not possible when sending code to a browser
 
 The default configuration looks like this:
 
 ```javascript
-atom.config.set('r-exec.whichEngine', 'R.app')
+atom.config.set('r-exec.whichApp', 'R.app')
 atom.config.set('r-exec.advancePosition', false)
 atom.config.set('r-exec.focusWindow', true)
 ```
@@ -48,7 +50,7 @@ atom.config.set('r-exec.focusWindow', true)
 ## Usage
 
 - `cmd-enter`: send code to configured engine (`r-exec:whichEngine`)
-- `cmd-shift-e`: change 2 current working directory of current file
+- `cmd-shift-e`: change to current working directory of current file
 
 ## Notes
 
@@ -59,7 +61,6 @@ In the RStudio Server case, the solution is pretty clunky - the code is sent to 
 ## TODO
 
 - Make the choice of which R.app to send the code to configurable, based on a project-level configuration variable (sometimes multiple copies of R.app are made so that multiple R GUIs can be running simultaneously for different projects).
-- Make which browser to use configurable in the RStudio Server case (currently hard-coded to Safari).
 - In RStudio Server case, make sure active window really is RStudio Server before pasting, maybe by checking the  [title](http://www.alfredforum.com/topic/2013-how-to-get-frontmost-tab's-url-and-title-of-various-browsers/).
 - Error reporting.
 - Support for Windows and Linux.

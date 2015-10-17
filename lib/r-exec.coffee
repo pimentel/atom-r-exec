@@ -14,11 +14,11 @@ module.exports =
       type: 'string'
       enum: [apps.chrome, apps.iterm, apps.rapp, apps.safari, apps.terminal]
       default: apps.rapp
-      description: 'Which application to send commands to'
+      description: 'Which application to send code to'
     advancePosition:
       type: 'boolean'
       default: false
-      description: 'If true, the cursor advances to the after sending the current block/line'
+      description: 'If true, the cursor advances to the next line after sending the current line when there is no selection'
     focusWindow:
       type: 'boolean'
       default: true
@@ -38,7 +38,7 @@ module.exports =
     @sendCode(selection.selection, whichApp)
 
     advancePosition = atom.config.get 'r-exec.advancePosition'
-    if advancePosition
+    if advancePosition and not selection.anySelection
       currentPosition.row += 1
       atom.workspace.getActiveTextEditor().setCursorScreenPosition(currentPosition)
       atom.workspace.getActiveTextEditor().moveToFirstCharacterOfLine()
