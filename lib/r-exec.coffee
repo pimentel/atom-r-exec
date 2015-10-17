@@ -1,33 +1,41 @@
 String::addSlashes = ->
   @replace(/[\\"]/g, "\\$&").replace /\u0000/g, "\\0"
 
+apps =
+  chrome: 'Google Chrome'
+  iterm: 'iTerm'
+  rapp: 'R.app'
+  safari: 'Safari'
+  terminal: 'Terminal'
+
 module.exports =
   config:
-    whichEngine:
+    whichApp:
       type: 'string'
-      default: 'R.app'
-      description: 'Which engine to send commands to. Valid engines are: R.app, Terminal, iTerm, and Safari.'
+      enum: [apps.chrome, apps.iterm, apps.rapp, apps.safari, apps.terminal]
+      default: apps.rapp
+      description: 'Which application to send commands to'
     advancePosition:
       type: 'boolean'
       default: false
-      description: 'If true, the cursor advances to the after sending the current block/line.'
+      description: 'If true, the cursor advances to the after sending the current block/line'
     focusWindow:
       type: 'boolean'
       default: true
-      description: 'If true, after code is sent, bring focus to where it was sent.'
+      description: 'If true, after code is sent, bring focus to where it was sent'
 
   activate: ->
     atom.commands.add 'atom-workspace',
-      'r-exec:send-command',  => @sendCommand()
+      'r-exec:send-command', => @sendCommand()
     atom.commands.add 'atom-workspace',
       'r-exec:setwd', => @setWorkingDirectory()
 
   sendCommand: ->
+    whichApp = atom.config.get 'r-exec.whichApp'
     # we store the current position so that we can jump back to it later (if the user wants to)
     currentPosition = atom.workspace.getActiveTextEditor().getCursorBufferPosition()
-    selection = @getSelection()
-
-    @sendCode(selection.selection)
+    selection = @getSelection(whichApp)
+    @sendCode(selection.selection, whichApp)
 
     advancePosition = atom.config.get 'r-exec.advancePosition'
     if advancePosition
@@ -39,17 +47,15 @@ module.exports =
       if not selection.anySelection
         atom.workspace.getActiveTextEditor().setCursorScreenPosition(currentPosition)
 
-  sendCode: (code) ->
-    whichEngine = atom.config.get 'r-exec.whichEngine'
+  sendCode: (code, whichApp) ->
+    switch whichApp
+      when apps.iterm then @iterm(code)
+      when apps.rapp then @rapp(code)
+      when apps.safari, apps.chrome then @browser(code, whichApp)
+      when apps.terminal then @terminal(code)
+      else console.error 'r-exec.whichApp "' + whichApp + '" is not supported.'
 
-    switch whichEngine
-      when 'iTerm' then @iterm(code)
-      when 'R.app' then  @rapp(code)
-      when 'Safari' then  @rstudioserver(code)
-      when 'Terminal' then  @terminal(code)
-      else console.error 'r-exec.whichEngine "' + whichEngine + '" is not supported.'
-
-  getSelection: ->
+  getSelection: (whichApp) ->
     # returns an object with keys:
     # selection: the selection or line at which the cursor is present
     # anySelection: if true, the user made a selection.
@@ -60,7 +66,9 @@ module.exports =
       anySelection = false
       atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
       selection = atom.workspace.getActiveTextEditor().getLastSelection()
-    selection = selection.getText().addSlashes()
+    selection = selection.getText()
+    if not (whichApp == apps.chrome or whichApp == apps.safari)
+      selection = selection.addSlashes()
 
     {selection: selection, anySelection: anySelection}
 
@@ -128,21 +136,23 @@ module.exports =
       else
         console.log result, raw
 
-  rstudioserver: (selection) ->
+  browser: (selection, whichApp) ->
     # This assumes the active pane item is an console
-    osascript = require 'node-osascript'
-
     atom.clipboard.write selection
     focusWindow = atom.config.get 'r-exec.focusWindow'
+
+    osascript = require 'node-osascript'
+
     command = []
+    whichApp = '"' + whichApp + '"'
     if not focusWindow
-      console.warn '"r-exec.focusWindow" is always set when engine is Safari'
-    command.push 'tell application "Safari" to activate'
+      console.warn '"r-exec.focusWindow" is always set when engine is Safari or Google Chrome'
+    command.push 'tell application ' + whichApp + ' to activate'
     command.push 'delay 0.5'
-    command.push 'tell application "System Events" to tell process "Safari" ' +\
+    command.push 'tell application "System Events" to tell process ' + whichApp + ' ' +\
       'to keystroke "v" using {command down}'
     command.push 'delay 0.1'
-    command.push 'tell application "System Events" to tell process "Safari" ' +\
+    command.push 'tell application "System Events" to tell process ' + whichApp + ' ' +\
       'to keystroke return'
     command = command.join('\n')
 
@@ -151,6 +161,5 @@ module.exports =
         console.error(error)
       else
         console.log result, raw
-
 
 atom.project.getPaths()
