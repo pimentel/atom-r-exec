@@ -73,11 +73,13 @@ module.exports =
 
   setWorkingDirectory: ->
     # set the current working directory to the directory of where the current file is
+    whichApp = atom.config.get 'r-exec.whichApp'
+
     cwd = atom.workspace.getActiveTextEditor().getPath()
     cwd = cwd.substring(0, cwd.lastIndexOf('/'))
     cwd = "setwd(\"" + cwd + "\")"
 
-    @sendCode(cwd.addSlashes())
+    @sendCode(cwd.addSlashes(), whichApp)
 
   iterm: (selection) ->
     # This assumes the active pane item is an console
