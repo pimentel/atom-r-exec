@@ -18,7 +18,7 @@ While `cmd-enter` is bound to sending code in the package, it is also annoyingly
 In order to make it work, you must add the following binding in `~/.atom/keymap.cson`:
 
 ```javascript
-'.workspace .editor':
+'atom-workspace atom-text-editor':
   'cmd-enter': 'r-exec:send-command'
 ```
 
