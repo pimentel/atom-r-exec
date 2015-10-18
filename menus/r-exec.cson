@@ -4,9 +4,8 @@
     'submenu': [
       'label': 'R-exec'
       'submenu': [
-        { 'label': 'Send to R.app', 'command': 'r-exec:send-to-r-app' },
-        { 'label': 'Send to Terminal', 'command': 'r-exec:send-to-terminal' },
-        { 'label': 'Send to RStudio Server', 'command': 'r-exec:send-to-rstudio-server' }
+        { 'label': 'Send code to R', 'command': 'r-exec:send-command'}
+        { 'label': 'Change working directory', 'command': 'r-exec:setwd'}
       ]
     ]
   }

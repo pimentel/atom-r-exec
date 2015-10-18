@@ -5,9 +5,8 @@
   "description": "Send R code to various R consoles",
   "activationCommands": {
     "atom-text-editor": [
-      "r-exec:send-to-r-app",
-      "r-exec:send-to-terminal",
-      "r-exec:send-to-rstudio-server"
+      "r-exec:send-command",
+      "r-exec:setwd"
     ]
   },
   "repository": "https://github.com/hafen/atom-r-exec",
@@ -22,6 +21,6 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "node-osascript": "1.0.0"
+    "node-osascript": "1.0.2"
   }
 }

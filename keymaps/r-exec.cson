@@ -12,6 +12,5 @@
 # and have custom command palette to choose application
 # https://discuss.atom.io/t/custom-use-of-the-command-palette/15702/2
 'atom-text-editor':
-  'cmd-shift-r': 'r-exec:send-to-r-app'
-  'cmd-shift-t': 'r-exec:send-to-terminal'
-  'cmd-shift-e': 'r-exec:send-to-rstudio-server'
+  'cmd-shift-e': 'r-exec:setwd'
+  'cmd-enter': 'r-exec:send-command'
