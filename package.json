@@ -6,6 +6,7 @@
   "activationCommands": {
     "atom-text-editor": [
       "r-exec:send-command",
+      "r-exec:send-paragraph",
       "r-exec:setwd"
     ]
   },

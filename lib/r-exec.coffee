@@ -1,3 +1,6 @@
+# RExecView = require './r-exec-view'
+{CompositeDisposable} = require 'atom'
+
 String::addSlashes = ->
   @replace(/[\\"]/g, "\\$&").replace /\u0000/g, "\\0"
 
@@ -18,33 +21,69 @@ module.exports =
     advancePosition:
       type: 'boolean'
       default: false
-      description: 'If true, the cursor advances to the next line after sending the current line when there is no selection'
+      description: 'If true, the cursor advances to the next line after ' +
+        'sending the current line when there is no selection'
     focusWindow:
       type: 'boolean'
       default: true
-      description: 'If true, after code is sent, bring focus to where it was sent'
+      description: 'If true, after code is sent, bring focus to where it was ' +
+        ' sent'
 
-  activate: ->
-    atom.commands.add 'atom-workspace',
+  # rExecView: null
+  modalPanel: null
+  subscriptions: null
+
+  activate: (state) ->
+    # @rExecView = new RExecView(state.rExecViewState)
+    # @modalPanel = atom.workspace.addModalPanel(
+    #   item: @rExecView.getElement(),
+    #   visible: false
+    # )
+
+    @subscriptions = new CompositeDisposable
+
+    @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:send-command', => @sendCommand()
-    atom.commands.add 'atom-workspace',
+    # @subscriptions.add atom.commands.add 'atom-workspace',
+    #   'r-exec:toggle': => @toggle()
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:send-paragraph': => @sendParagraph()
+    @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:setwd', => @setWorkingDirectory()
+
+
+  deactivate: ->
+    @subscriptions.dispose()
+    # @modalPanel.destroy()
+    # @rExecView.destroy()
+
+  # toggle: ->
+  #   console.log 'Wordcount was toggled!'
+  #
+  #   if @modalPanel.isVisible()
+  #     @modalPanel.hide()
+  #   else
+  #     @modalPanel.show()
 
   sendCommand: ->
     whichApp = atom.config.get 'r-exec.whichApp'
-    # we store the current position so that we can jump back to it later (if the user wants to)
-    currentPosition = atom.workspace.getActiveTextEditor().getLastSelection().getScreenRange().end
+    # we store the current position so that we can jump back to it later
+    # (if the user wants to)
+    currentPosition = atom.workspace.getActiveTextEditor().
+      getLastSelection().getScreenRange().end
     selection = @getSelection(whichApp)
     @sendCode(selection.selection, whichApp)
 
     advancePosition = atom.config.get 'r-exec.advancePosition'
     if advancePosition and not selection.anySelection
       currentPosition.row += 1
-      atom.workspace.getActiveTextEditor().setCursorScreenPosition(currentPosition)
+      atom.workspace.getActiveTextEditor().
+        setCursorScreenPosition(currentPosition)
       atom.workspace.getActiveTextEditor().moveToFirstCharacterOfLine()
     else
       if not selection.anySelection
-        atom.workspace.getActiveTextEditor().setCursorScreenPosition(currentPosition)
+        atom.workspace.getActiveTextEditor().
+          setCursorScreenPosition(currentPosition)
 
   sendCode: (code, whichApp) ->
     switch whichApp
@@ -71,11 +110,30 @@ module.exports =
 
     {selection: selection, anySelection: anySelection}
 
+  sendParagraph: ->
+    whichApp = atom.config.get 'r-exec.whichApp'
+    editor = atom.workspace.getActiveTextEditor()
+    paragraphRange = editor.getCurrentParagraphBufferRange()
+
+    if paragraphRange
+      code = editor.getTextInBufferRange(paragraphRange)
+      code = code.addSlashes()
+      @sendCode(code, whichApp)
+      advancePosition = atom.config.get 'r-exec.advancePosition'
+      if advancePosition
+        editor.moveToBeginningOfNextParagraph()
+    else
+      console.error 'No paragraph at cursor.'
+
   setWorkingDirectory: ->
-    # set the current working directory to the directory of where the current file is
+    # set the current working directory to the directory of
+    # where the current file is
     whichApp = atom.config.get 'r-exec.whichApp'
 
     cwd = atom.workspace.getActiveTextEditor().getPath()
+    if not cwd
+      console.error 'No current working directory (save the file first).'
+      return
     cwd = cwd.substring(0, cwd.lastIndexOf('/'))
     cwd = "setwd(\"" + cwd + "\")"
 
@@ -113,6 +171,8 @@ module.exports =
     command.push 'tell application "R" to cmd code'
     command = command.join('\n')
 
+    console.log selection
+    console.log command
     osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
@@ -147,13 +207,16 @@ module.exports =
     command = []
     whichApp = '"' + whichApp + '"'
     if not focusWindow
-      console.warn '"r-exec.focusWindow" is always set when engine is Safari or Google Chrome'
+      console.warn '"r-exec.focusWindow" is always set when engine is ' +
+        'Safari or Google Chrome'
     command.push 'tell application ' + whichApp + ' to activate'
     command.push 'delay 0.5'
-    command.push 'tell application "System Events" to tell process ' + whichApp + ' ' +\
+    command.push 'tell application "System Events" to tell process ' +
+      whichApp + ' ' +
       'to keystroke "v" using {command down}'
     command.push 'delay 0.1'
-    command.push 'tell application "System Events" to tell process ' + whichApp + ' ' +\
+    command.push 'tell application "System Events" to tell process ' +
+      whichApp + ' ' +
       'to keystroke return'
     command = command.join('\n')
 
