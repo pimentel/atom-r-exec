@@ -1,5 +1,7 @@
 # RExecView = require './r-exec-view'
 {CompositeDisposable} = require 'atom'
+{Point} = require 'atom'
+{Range} = require 'atom'
 
 String::addSlashes = ->
   @replace(/[\\"]/g, "\\$&").replace /\u0000/g, "\\0"
@@ -49,6 +51,8 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:send-paragraph': => @sendParagraph()
     @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:send-function': => @sendFunction()
+    @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:setwd', => @setWorkingDirectory()
 
 
@@ -92,6 +96,63 @@ module.exports =
       when apps.safari, apps.chrome then @browser(code, whichApp)
       when apps.terminal then @terminal(code)
       else console.error 'r-exec.whichApp "' + whichApp + '" is not supported.'
+
+  getFunctionRange: ->
+    # gets the range of the closest function above the cursor.
+    # if there is no (proper) function, return false
+    editor = atom.workspace.getActiveTextEditor()
+    currentPosition = editor.getCursorBufferPosition()
+    # search for the simple function that looks something like:
+    # label <- function(...) {
+    # in case the current function definition is on the current line
+    currentPosition.row += 1
+    backwardRange = [0, currentPosition]
+    funRegex = new
+      RegExp(/^[a-zA-Z]+[a-zA-Z0-9_]*[\s]*(<-|=)[\s]*(function)[^{]*{/g)
+    foundStart = null
+    editor.backwardsScanInBufferRange funRegex, backwardRange, (result) ->
+      foundStart = result.range
+      result.stop()
+
+    if not foundStart?
+      console.error "Couldn't find the beginning of the function."
+      return null
+
+    # now look for the end
+    numberOfLines = editor.getLineCount()
+    forwardRange = [foundStart, new Point(numberOfLines + 1, 0)]
+
+    foundEnd = null
+    editor.scanInBufferRange /}/g, forwardRange, (result) ->
+      if result.range.start.column == 0
+        foundEnd = result.range
+        result.stop()
+
+    if not foundEnd?
+      console.error "Couldn't find the end of the function."
+      return null
+
+    # check if cursor is contained in range
+    currentPosition.row -= 1
+    console.log 'the current position: ', currentPosition
+    if foundStart.start.row <= currentPosition.row and
+        currentPosition.row <= foundEnd.start.row
+      return new Range(foundStart.start, foundEnd.end)
+    else
+      console.error "Couldn't find a function surrounding the current line."
+      return null
+
+  sendFunction: ->
+    editor = atom.workspace.getActiveTextEditor()
+    whichApp = atom.config.get 'r-exec.whichApp'
+
+    range = @getFunctionRange()
+    if range
+      console.log "the final range: ", range
+      code = editor.getTextInBufferRange(range)
+      atom.notifications.addInfo("what's up dude")
+
+      @sendCode(code, whichApp)
 
   getSelection: (whichApp) ->
     # returns an object with keys:

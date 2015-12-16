@@ -15,6 +15,7 @@
   'cmd-shift-e': 'r-exec:setwd'
   'cmd-enter': 'r-exec:send-command'
   'shift-cmd-m': 'r-exec:send-paragraph'
+  'shift-cmd-u': 'r-exec:send-function'
   # send paragraph
   # shift-cmd y, u, i, j, k, x, m
   # send function

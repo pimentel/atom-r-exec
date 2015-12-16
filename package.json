@@ -7,6 +7,7 @@
     "atom-text-editor": [
       "r-exec:send-command",
       "r-exec:send-paragraph",
+      "r-exec:send-function",
       "r-exec:setwd"
     ]
   },
