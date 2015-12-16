@@ -1,6 +1,4 @@
-{CompositeDisposable} = require 'atom'
-{Point} = require 'atom'
-{Range} = require 'atom'
+{CompositeDisposable, Point, Range} = require 'atom'
 
 String::addSlashes = ->
   @replace(/[\\"]/g, "\\$&").replace /\u0000/g, "\\0"
@@ -22,13 +20,12 @@ module.exports =
     advancePosition:
       type: 'boolean'
       default: false
-      description: 'If true, the cursor advances to the next line after ' +
+      description: 'Cursor advances to the next line after ' +
         'sending the current line when there is no selection'
     focusWindow:
       type: 'boolean'
       default: true
-      description: 'If true, after code is sent, bring focus to where it was ' +
-        ' sent'
+      description: 'After code is sent, bring focus to where it was sent'
     notifications:
       type: 'boolean'
       default: true
@@ -48,8 +45,31 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:setwd', => @setWorkingDirectory()
 
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:set-chrome', => @setChrome()
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:set-iterm', => @setIterm()
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:set-rapp', => @setRApp()
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:set-safari', => @setSafari()
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:set-terminal', => @setTerminal()
+
   deactivate: ->
     @subscriptions.dispose()
+
+  setChrome: ->
+    atom.config.set('r-exec.whichApp', apps.chrome)
+  setIterm: ->
+    atom.config.set('r-exec.whichApp', apps.iterm)
+  setRApp: ->
+    atom.config.set('r-exec.whichApp', apps.rapp)
+  setSafari: ->
+    atom.config.set('r-exec.whichApp', apps.safari)
+  setTerminal: ->
+    atom.config.set('r-exec.whichApp', apps.terminal)
+
 
   sendCommand: ->
     whichApp = atom.config.get 'r-exec.whichApp'
@@ -207,8 +227,6 @@ module.exports =
     osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
-      else
-        console.log result, raw
 
   rapp: (selection) ->
     osascript = require 'node-osascript'
@@ -222,8 +240,6 @@ module.exports =
     osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
-      else
-        console.log result, raw
 
   terminal: (selection) ->
     # This assumes the active pane item is an console
@@ -240,8 +256,6 @@ module.exports =
     osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
-      else
-        console.log result, raw
 
   browser: (selection, whichApp) ->
     # This assumes the active pane item is an console
@@ -269,7 +283,5 @@ module.exports =
     osascript.execute command, (error, result, raw) ->
       if error
         console.error(error)
-      else
-        console.log result, raw
 
 atom.project.getPaths()

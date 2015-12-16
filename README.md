@@ -18,7 +18,7 @@ While `cmd-enter` is bound to sending code in the package, it is also annoyingly
 In order to make it work, you must add the following binding in `~/.atom/keymap.cson`:
 
 ```javascript
-'atom-workspace atom-text-editor':
+'atom-workspace atom-text-editor:not([mini])':
   'cmd-enter': 'r-exec:send-command'
 ```
 
@@ -28,7 +28,7 @@ All configuration can be done in the settings panel. Alternatively, you can edit
 
 In your global configuration file (`~/.atom/init.coffee`), you may set the following variables:
 
-- `r-exec.whichApp` which R engine to use. Valid engines are:
+- `r-exec.whichApp` which R application to use. Valid applications are:
   - `R.app`: the default (the R GUI)
   - `iTerm` or `Terminal`: Assumes the currently active terminal has R running
   - `Safari` or `Google Chrome`: assumes the currently active tab has an active RStudio session running, with the console active
@@ -38,6 +38,8 @@ In your global configuration file (`~/.atom/init.coffee`), you may set the follo
 - `r-exec.focusWindow`
   - if `true`, focus the window before sending code
   - if `false`, send the code in the background and stay focused on Atom. This is not possible when sending code to a browser
+- `r-exec.notifications`
+  - if `true`, notifications via `NotificationManager` when a paragraph or function is not identified
 
 The default configuration looks like this:
 
@@ -45,12 +47,15 @@ The default configuration looks like this:
 atom.config.set('r-exec.whichApp', 'R.app')
 atom.config.set('r-exec.advancePosition', false)
 atom.config.set('r-exec.focusWindow', true)
+atom.config.set('r-exec.notifications', true)
 ```
 
 ## Usage
 
-- `cmd-enter`: send code to configured engine (`r-exec:whichEngine`)
+- `cmd-enter`: send code to configured application (`r-exec:whichApp`)
 - `cmd-shift-e`: change to current working directory of current file
+- `shift-cmd-u`: send function under current cursor
+- `shift-cmd-m`: send paragraph under current cursor
 
 ## Notes
 

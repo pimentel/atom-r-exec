@@ -8,7 +8,12 @@
       "r-exec:send-command",
       "r-exec:send-paragraph",
       "r-exec:send-function",
-      "r-exec:setwd"
+      "r-exec:setwd",
+      "r-exec:set-chrome",
+      "r-exec:set-iterm",
+      "r-exec:set-rapp",
+      "r-exec:set-safari",
+      "r-exec:set-terminal"
     ]
   },
   "repository": "https://github.com/hafen/atom-r-exec",
