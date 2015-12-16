@@ -30,6 +30,10 @@ module.exports =
       default: true
       description: 'If true, after code is sent, bring focus to where it was ' +
         ' sent'
+    notifications:
+      type: 'boolean'
+      default: true
+      description: 'Send notifications if there is an error sending code'
 
   # rExecView: null
   modalPanel: null
@@ -147,12 +151,11 @@ module.exports =
     whichApp = atom.config.get 'r-exec.whichApp'
 
     range = @getFunctionRange()
-    if range
-      console.log "the final range: ", range
+    if range?
       code = editor.getTextInBufferRange(range)
-      atom.notifications.addInfo("what's up dude")
-
       @sendCode(code, whichApp)
+    else
+      @conditionalWarning("Couldn't find function.")
 
   getSelection: (whichApp) ->
     # returns an object with keys:
@@ -171,6 +174,11 @@ module.exports =
 
     {selection: selection, anySelection: anySelection}
 
+  conditionalWarning: (message) ->
+    notifications = atom.config.get 'r-exec.notifications'
+    if notifications
+      atom.notifications.addWarning(message)
+
   sendParagraph: ->
     whichApp = atom.config.get 'r-exec.whichApp'
     editor = atom.workspace.getActiveTextEditor()
@@ -185,6 +193,7 @@ module.exports =
         editor.moveToBeginningOfNextParagraph()
     else
       console.error 'No paragraph at cursor.'
+      @conditionalWarning("No paragraph at cursor.")
 
   setWorkingDirectory: ->
     # set the current working directory to the directory of
@@ -194,6 +203,7 @@ module.exports =
     cwd = atom.workspace.getActiveTextEditor().getPath()
     if not cwd
       console.error 'No current working directory (save the file first).'
+      @conditionalWarning('No current working directory (save the file first).')
       return
     cwd = cwd.substring(0, cwd.lastIndexOf('/'))
     cwd = "setwd(\"" + cwd + "\")"
