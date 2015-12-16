@@ -110,7 +110,7 @@ module.exports =
     currentPosition.row += 1
     backwardRange = [0, currentPosition]
     funRegex = new
-      RegExp(/^[a-zA-Z]+[a-zA-Z0-9_]*[\s]*(<-|=)[\s]*(function)[^{]*{/g)
+      RegExp(/^[a-zA-Z]+[a-zA-Z0-9_\.]*[\s]*(<-|=)[\s]*(function)[^{]*{/g)
     foundStart = null
     editor.backwardsScanInBufferRange funRegex, backwardRange, (result) ->
       foundStart = result.range
