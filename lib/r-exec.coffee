@@ -1,4 +1,3 @@
-# RExecView = require './r-exec-view'
 {CompositeDisposable} = require 'atom'
 {Point} = require 'atom'
 {Range} = require 'atom'
@@ -35,23 +34,13 @@ module.exports =
       default: true
       description: 'Send notifications if there is an error sending code'
 
-  # rExecView: null
-  modalPanel: null
   subscriptions: null
 
   activate: (state) ->
-    # @rExecView = new RExecView(state.rExecViewState)
-    # @modalPanel = atom.workspace.addModalPanel(
-    #   item: @rExecView.getElement(),
-    #   visible: false
-    # )
-
     @subscriptions = new CompositeDisposable
 
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:send-command', => @sendCommand()
-    # @subscriptions.add atom.commands.add 'atom-workspace',
-    #   'r-exec:toggle': => @toggle()
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:send-paragraph': => @sendParagraph()
     @subscriptions.add atom.commands.add 'atom-workspace',
@@ -59,19 +48,8 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:setwd', => @setWorkingDirectory()
 
-
   deactivate: ->
     @subscriptions.dispose()
-    # @modalPanel.destroy()
-    # @rExecView.destroy()
-
-  # toggle: ->
-  #   console.log 'Wordcount was toggled!'
-  #
-  #   if @modalPanel.isVisible()
-  #     @modalPanel.hide()
-  #   else
-  #     @modalPanel.show()
 
   sendCommand: ->
     whichApp = atom.config.get 'r-exec.whichApp'
@@ -138,7 +116,6 @@ module.exports =
 
     # check if cursor is contained in range
     currentPosition.row -= 1
-    console.log 'the current position: ', currentPosition
     if foundStart.start.row <= currentPosition.row and
         currentPosition.row <= foundEnd.start.row
       return new Range(foundStart.start, foundEnd.end)
@@ -242,8 +219,6 @@ module.exports =
     command.push 'tell application "R" to cmd code'
     command = command.join('\n')
 
-    console.log selection
-    console.log command
     osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
