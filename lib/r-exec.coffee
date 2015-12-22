@@ -156,7 +156,7 @@ module.exports =
     range = @getFunctionRange()
     if range?
       code = editor.getTextInBufferRange(range)
-      @sendCode(code, whichApp)
+      @sendCode(code.addSlashes(), whichApp)
     else
       @conditionalWarning("Couldn't find function.")
 
@@ -243,9 +243,12 @@ module.exports =
     command.push 'tell application "R" to cmd code'
     command = command.join('\n')
 
-    osascript.execute command, {code: selection}, (error, result, raw) ->
-      if error
-        console.error(error)
+    osascript.execute command, {code: selection},
+      (error, result, raw) ->
+        if error
+          console.error error
+          console.error 'code: ', selection
+          console.error 'Applescript: ', command
 
   terminal: (selection) ->
     # This assumes the active pane item is an console
