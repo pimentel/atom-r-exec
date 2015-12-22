@@ -110,13 +110,14 @@ module.exports =
     currentPosition.row += 1
     backwardRange = [0, currentPosition]
     funRegex = new
-      RegExp(/^[a-zA-Z]+[a-zA-Z0-9_\.]*[\s]*(<-|=)[\s]*(function)[\s]*\(/g)
+      RegExp(/[a-zA-Z]+[a-zA-Z0-9_\.]*[\s]*(<-|=)[\s]*(function)[\s]*\(/g)
     # funRegex = new
     #   RegExp(/^[a-zA-Z]+[a-zA-Z0-9_\.]*[\s]*(<-|=)[\s]*(function)[^{]*{/g)
     foundStart = null
     editor.backwardsScanInBufferRange funRegex, backwardRange, (result) ->
-      foundStart = result.range
-      result.stop()
+      if result.range.start.column == 0
+        foundStart = result.range
+        result.stop()
 
     if not foundStart?
       console.error "Couldn't find the beginning of the function."
@@ -124,7 +125,7 @@ module.exports =
 
     # now look for the end
     numberOfLines = editor.getLineCount()
-    forwardRange = [foundStart, new Point(numberOfLines + 1, 0)]
+    forwardRange = [foundStart.start, new Point(numberOfLines + 1, 0)]
 
     foundEnd = null
     editor.scanInBufferRange /}/g, forwardRange, (result) ->
@@ -143,6 +144,9 @@ module.exports =
       return new Range(foundStart.start, foundEnd.end)
     else
       console.error "Couldn't find a function surrounding the current line."
+      console.error "start: ", foundStart
+      console.error "end: ", foundEnd
+      console.error "currentPosition: ", currentPosition
       return null
 
   sendFunction: ->
