@@ -45,6 +45,10 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:setwd', => @setWorkingDirectory()
 
+    # # this is for testing
+    # @subscriptions.add atom.commands.add 'atom-workspace',
+    #   'r-exec:test',  => @getCurrentParagraphRange()
+
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:set-chrome', => @setChrome()
     @subscriptions.add atom.commands.add 'atom-workspace',
@@ -182,10 +186,50 @@ module.exports =
     if notifications
       atom.notifications.addWarning(message)
 
+  onlyWhitespace: (str) ->
+    # returns true if string is only whitespace
+    return str.replace(/\s/g, '').length is 0
+
+  getCurrentParagraphRange: ->
+    editor = atom.workspace.getActiveTextEditor()
+    buffer = editor.getBuffer()
+    currentPosition = editor.getCursorBufferPosition().row
+
+    currentLine = buffer.lineForRow(currentPosition)
+
+    if @onlyWhitespace(currentLine)
+      return null
+
+    startIndex = -1
+    # if we exhaust loop, then this paragraph begins at the first line
+    if currentPosition > 0
+      for lineIndex in [(currentPosition - 1)..0]
+        currentLine = buffer.lineForRow(lineIndex)
+        if @onlyWhitespace(currentLine)
+          startIndex = lineIndex
+          break
+    startIndex += 1
+
+    endIndex = editor.getLineCount()
+    numberOfLines = editor.getLineCount() - 1
+    if currentPosition < endIndex - 1
+      for lineIndex in [(currentPosition + 1)..numberOfLines]
+        currentLine = buffer.lineForRow(lineIndex)
+        if @onlyWhitespace(currentLine)
+          endIndex = lineIndex
+          break
+    endIndex -= 1
+
+    paragraphRange = new Range([startIndex, 0],
+      [endIndex, buffer.lineLengthForRow(endIndex)])
+
+    return paragraphRange
+
   sendParagraph: ->
     whichApp = atom.config.get 'r-exec.whichApp'
     editor = atom.workspace.getActiveTextEditor()
-    paragraphRange = editor.getCurrentParagraphBufferRange()
+    # paragraphRange = editor.getCurrentParagraphBufferRange()
+    paragraphRange = @getCurrentParagraphRange()
 
     if paragraphRange
       code = editor.getTextInBufferRange(paragraphRange)
@@ -193,7 +237,11 @@ module.exports =
       @sendCode(code, whichApp)
       advancePosition = atom.config.get 'r-exec.advancePosition'
       if advancePosition
-        editor.moveToBeginningOfNextParagraph()
+        buffer = editor.getBuffer()
+        # editor.moveToBeginningOfNextParagraph()
+        nextRow = buffer.nextNonBlankRow(paragraphRange.end.row)
+        editor.setCursorScreenPosition([nextRow, 0])
+        editor.moveToFirstCharacterOfLine()
     else
       console.error 'No paragraph at cursor.'
       @conditionalWarning("No paragraph at cursor.")

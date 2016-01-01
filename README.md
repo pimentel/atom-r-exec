@@ -52,10 +52,15 @@ atom.config.set('r-exec.notifications', true)
 
 ## Usage
 
-- `cmd-enter`: send code to configured application (`r-exec:whichApp`)
-- `cmd-shift-e`: change to current working directory of current file
-- `shift-cmd-u`: send function under current cursor
-- `shift-cmd-m`: send paragraph under current cursor
+- `cmd-enter`: send code to configured application (`r-exec:whichApp`).
+- `cmd-shift-e`: change to current working directory of current file.
+- `shift-cmd-u`: send function under current cursor. Currently, only functions that begin of the first column in and on the first column of a line are sent. An example:
+```r
+myFunction <- function(x) {
+  # my code goes here
+}
+```
+- `shift-cmd-m`: send paragraph under current cursor. A paragraph is a region enclosed by whitespace.
 
 ## Notes
 
