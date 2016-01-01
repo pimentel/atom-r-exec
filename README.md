@@ -33,7 +33,7 @@ In your global configuration file (`~/.atom/init.coffee`), you may set the follo
   - `iTerm` or `Terminal`: Assumes the currently active terminal has R running
   - `Safari` or `Google Chrome`: assumes the currently active tab has an active RStudio session running, with the console active
 - `r-exec.advancePosition`
-  - if `true`, go to the after running the current line
+  - if `true`, go to the next line/paragraph after running the current line/paragraph
   - if `false`, leave the cursor where it currently is
 - `r-exec.focusWindow`
   - if `true`, focus the window before sending code
