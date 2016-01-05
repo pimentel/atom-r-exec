@@ -1,12 +1,19 @@
 {
   "name": "r-exec",
   "main": "./lib/r-exec",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Send R code to various R consoles",
   "activationCommands": {
     "atom-text-editor": [
       "r-exec:send-command",
-      "r-exec:setwd"
+      "r-exec:send-paragraph",
+      "r-exec:send-function",
+      "r-exec:setwd",
+      "r-exec:set-chrome",
+      "r-exec:set-iterm",
+      "r-exec:set-rapp",
+      "r-exec:set-safari",
+      "r-exec:set-terminal"
     ]
   },
   "repository": "https://github.com/hafen/atom-r-exec",

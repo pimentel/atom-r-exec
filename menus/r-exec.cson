@@ -4,8 +4,18 @@
     'submenu': [
       'label': 'R-exec'
       'submenu': [
-        { 'label': 'Send code to R', 'command': 'r-exec:send-command'}
+        { 'label': 'Send line/selection', 'command': 'r-exec:send-command'}
+        { 'label': 'Send function', 'command': 'r-exec:send-function'}
+        { 'label': 'Send paragraph', 'command': 'r-exec:send-paragraph'}
         { 'label': 'Change working directory', 'command': 'r-exec:setwd'}
+        'label': 'Change app'
+        'submenu': [
+          { 'label': 'Chrome', 'command': 'r-exec:set-chrome'}
+          { 'label': 'iTerm', 'command': 'r-exec:set-iterm'}
+          { 'label': 'R.app', 'command': 'r-exec:set-rapp'}
+          { 'label': 'Safari', 'command': 'r-exec:set-safari'}
+          { 'label': 'Terminal', 'command': 'r-exec:set-terminal'}
+        ]
       ]
     ]
   }
