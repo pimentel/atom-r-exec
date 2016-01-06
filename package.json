@@ -16,7 +16,7 @@
       "r-exec:set-terminal"
     ]
   },
-  "repository": "https://github.com/hafen/atom-r-exec",
+  "repository": "https://github.com/pimentel/atom-r-exec",
   "keywords": [
     "R",
     "code",
