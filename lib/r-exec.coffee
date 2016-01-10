@@ -314,8 +314,28 @@ module.exports =
       if error
         console.error(error)
 
+  getWhichApp: ->
+    return atom.config.get 'r-exec.whichApp'
+
+  getBrowserTitle: (callback) ->
+    osascript = require 'node-osascript'
+    whichApp = @getWhichApp()
+    command = switch whichApp
+      when apps.safari
+        '"Safari" to return name of front document'
+      when apps.chrome
+        '"Google Chrome" to return title of active tab of front window'
+      else null
+
+    if not command?
+      @conditionalWarning('whichApp is not a recognized browser.')
+      callback('whichApp is not a recognized browser.')
+
+    command = 'tell application ' + command
+    osascript.execute command, callback
+
   browser: (selection, whichApp) ->
-    # This assumes the active pane item is an console
+    # This assumes the active pane item is a console
     atom.clipboard.write selection
     focusWindow = atom.config.get 'r-exec.focusWindow'
 
@@ -337,8 +357,17 @@ module.exports =
       'to keystroke return'
     command = command.join('\n')
 
-    osascript.execute command, (error, result, raw) ->
-      if error
-        console.error(error)
+    @getBrowserTitle( (e, res, r) ->
+      if e
+        console.error e
+        return
 
-atom.project.getPaths()
+      if not /RStudio/.test(res)
+        # TODO: give a warning if this isn't working
+        console.error 'RStudio is not in the title of the window'
+        return
+
+      osascript.execute command, (error, result, raw) ->
+        if error
+          console.error(error)
+      )
