@@ -160,7 +160,9 @@ module.exports =
     range = @getFunctionRange()
     if range?
       code = editor.getTextInBufferRange(range)
-      @sendCode(code.addSlashes(), whichApp)
+      if not (whichApp == apps.chrome or whichApp == apps.safari)
+        code = code.addSlashes()
+      @sendCode(code, whichApp)
     else
       @conditionalWarning("Couldn't find function.")
 
@@ -233,7 +235,8 @@ module.exports =
 
     if paragraphRange
       code = editor.getTextInBufferRange(paragraphRange)
-      code = code.addSlashes()
+      if not (whichApp == apps.chrome or whichApp == apps.safari)
+        code = code.addSlashes()
       @sendCode(code, whichApp)
       advancePosition = atom.config.get 'r-exec.advancePosition'
       if advancePosition
