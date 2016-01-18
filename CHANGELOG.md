@@ -1,3 +1,8 @@
+## 0.3.2 - Send knitr block ([@pimentel](https://github.com/pimentel))
+- Allow user to send a RMarkdown block
+- When sending to server, if the title does not contain 'RStudio', print a error
+- When using `advancePosition`, if sending the current line, advance to the next non-empty line (rather than simply the next line)
+
 ## 0.3.1 - Send function or paragraph ([@pimentel](https://github.com/pimentel))
 - Allow user to send function or paragraph
 - Add configuration allowing notifications
