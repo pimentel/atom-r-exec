@@ -76,26 +76,30 @@ module.exports =
   setTerminal: ->
     atom.config.set('r-exec.whichApp', apps.terminal)
 
+  _getEditorAndBuffer: ->
+    editor = atom.workspace.getActiveTextEditor()
+    buffer = editor.getBuffer()
+    return [editor, buffer]
 
   sendCommand: ->
     whichApp = atom.config.get 'r-exec.whichApp'
+    [editor, buffer] = @_getEditorAndBuffer()
     # we store the current position so that we can jump back to it later
     # (if the user wants to)
-    currentPosition = atom.workspace.getActiveTextEditor().
-      getLastSelection().getScreenRange().end
+    currentPosition = editor.getLastSelection().getScreenRange().end
     selection = @getSelection(whichApp)
     @sendCode(selection.selection, whichApp)
 
     advancePosition = atom.config.get 'r-exec.advancePosition'
     if advancePosition and not selection.anySelection
-      currentPosition.row += 1
-      atom.workspace.getActiveTextEditor().
-        setCursorScreenPosition(currentPosition)
-      atom.workspace.getActiveTextEditor().moveToFirstCharacterOfLine()
+      nextPosition = @_findForward(@nonEmptyLine, currentPosition.row + 1)
+      nextPosition ?= [currentPosition + 1, 0]
+      # currentPosition.row += 1
+      editor.setCursorScreenPosition(nextPosition)
+      editor.moveToFirstCharacterOfLine()
     else
       if not selection.anySelection
-        atom.workspace.getActiveTextEditor().
-          setCursorScreenPosition(currentPosition)
+        editor.setCursorScreenPosition(currentPosition)
 
   sendCode: (code, whichApp) ->
     switch whichApp
@@ -172,13 +176,15 @@ module.exports =
     # returns an object with keys:
     # selection: the selection or line at which the cursor is present
     # anySelection: if true, the user made a selection.
-    selection = atom.workspace.getActiveTextEditor().getLastSelection()
+    [editor, buffer] = @_getEditorAndBuffer()
+
+    selection = editor.getLastSelection()
     anySelection = true
 
     if selection.getText().addSlashes() == ""
       anySelection = false
-      atom.workspace.getActiveTextEditor().selectLinesContainingCursors()
-      selection = atom.workspace.getActiveTextEditor().getLastSelection()
+      editor.selectLinesContainingCursors()
+      selection = editor.getLastSelection()
     selection = selection.getText()
     if not (whichApp == apps.chrome or whichApp == apps.safari)
       selection = selection.addSlashes()
@@ -250,6 +256,12 @@ module.exports =
     else
       console.error 'No paragraph at cursor.'
       @conditionalWarning("No paragraph at cursor.")
+
+  isWhitespaceLine: (line) ->
+    return line.replace(/\s/g, '').length is 0
+
+  nonEmptyLine: (line) ->
+    return line.replace(/\s/g, '').length > 0
 
   _findBackward: (searchFun, startPosition = null) ->
     editor = atom.workspace.getActiveTextEditor()
@@ -352,8 +364,6 @@ module.exports =
       console.error msg
       return
 
-    # potentially a bug if start and end are on the same line
-    # should also check if start > end
     code = editor.getTextInBufferRange(codeRange)
     if not (whichApp == apps.chrome or whichApp == apps.safari)
       code = code.addSlashes()
