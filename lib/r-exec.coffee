@@ -251,35 +251,57 @@ module.exports =
       console.error 'No paragraph at cursor.'
       @conditionalWarning("No paragraph at cursor.")
 
+  _findBackward: (searchFun, startPosition = null) ->
+    editor = atom.workspace.getActiveTextEditor()
+    buffer = editor.getBuffer()
+
+    if not startPosition?
+      startPosition = editor.getCursorBufferPosition().row
+
+    index = null
+    for lineIndex in [startPosition..0]
+      currentLine = buffer.lineForRow(lineIndex)
+      if searchFun(currentLine)
+        index = lineIndex
+        break
+
+    position = null
+    if index?
+      position = [index, 0]
+
+    return position
+
+  _findForward: (searchFun, startPosition = null) ->
+    editor = atom.workspace.getActiveTextEditor()
+    buffer = editor.getBuffer()
+
+    if not startPosition?
+      startPosition = editor.getCursorBufferPosition().row
+
+    index = null
+    numberOfLines = editor.getLineCount() - 1
+    for lineIndex in [startPosition..numberOfLines]
+      currentLine = buffer.lineForRow(lineIndex)
+      if searchFun(currentLine)
+        index = lineIndex
+        break
+
+    if index?
+      return [index, buffer.lineLengthForRow(index)]
+
+    return null
+
   getGeneralRange: (startFun, endFun) ->
     # returns a Range with the beginning being the first line of the
     # knitr block and the end of the knitr block.
-    # if the beginning is not found, the beginning row is -1
-    # if the end is not found, end is editor.getLineCount()
-    editor = atom.workspace.getActiveTextEditor()
-    buffer = editor.getBuffer()
-    currentPosition = editor.getCursorBufferPosition().row
+    startPosition = @_findBackward(startFun)
+    endPosition = null
+    if startPosition?
+      endPosition = @_findForward(endFun, startPosition[0] + 1)
+    if startPosition? and endPosition?
+      return new Range(startPosition, endPosition)
 
-    startIndex = -1
-    for lineIndex in [currentPosition..0]
-      currentLine = buffer.lineForRow(lineIndex)
-      if startFun(currentLine)
-        startIndex = lineIndex
-        break
-
-    endIndex = editor.getLineCount()
-    numberOfLines = editor.getLineCount() - 1
-    for lineIndex in [currentPosition..numberOfLines]
-      currentLine = buffer.lineForRow(lineIndex)
-      if endFun(currentLine)
-        endIndex = lineIndex
-        break
-
-    endColumn = 0
-    if not(endIndex is editor.getLineCount())
-      endColumn = buffer.lineLengthForRow(endIndex)
-
-    return new Range([startIndex, 0], [endIndex, endColumn])
+    return null
 
   rMarkdownStart: (line) ->
     return /^\s*([`]{3})\s*([\{]{0,1})([rR])([^\}]*)([\}]{0,1})\s*$/.test(line)
@@ -293,31 +315,24 @@ module.exports =
     codeRange = null
     fileName = editor.getPath()
     extension = fileName.split('.').pop()
-    console.log extension
 
     if /rmd/i.test(extension)
       codeRange = @getGeneralRange(@rMarkdownStart, @rMarkdownEnd)
     else if /rnw/i.test(extension)
       @conditionalWarning("Rnw not implemented yet")
-      return null
+      return
     else
       @conditionalWarning("File not recognized as knitr.")
-      return null
+      return
 
     whichApp = atom.config.get 'r-exec.whichApp'
     currentPosition = editor.getCursorBufferPosition().row
 
-    if codeRange.start.row == -1
-      msg = "Couldn't find the beginning of a knitr block."
+    if not codeRange?
+      msg = "Couldn't find the beginning or end of a knitr block."
       atom.notifications.addError(msg)
       console.error msg
-      return null
-
-    if codeRange.end.row == editor.getLineCount()
-      msg = "Couldn't find the end of a knitr block."
-      atom.notifications.addError(msg)
-      console.error msg
-      return null
+      return
 
     # ensure that current line is contained in codeRange
     if not(codeRange.start.row <= currentPosition and
@@ -325,11 +340,17 @@ module.exports =
       msg = "Couldn't find a knitr block at the current position."
       atom.notifications.addError(msg)
       console.error msg
-      return null
+      return
 
     codeRange.start.row += 1
     codeRange.end.row -= 1
     codeRange.end.column = buffer.lineLengthForRow(codeRange.end.row)
+
+    if (codeRange.end.row - codeRange.start.row) <= 0
+      msg = "Empty knitr block."
+      atom.notifications.addError(msg)
+      console.error msg
+      return
 
     # potentially a bug if start and end are on the same line
     # should also check if start > end
@@ -338,7 +359,13 @@ module.exports =
       code = code.addSlashes()
     @sendCode(code, whichApp)
 
-    # TODO: deal with advancePosition
+    advancePosition = atom.config.get 'r-exec.advancePosition'
+    if advancePosition
+      nextBlockStart = @_findForward(@rMarkdownStart, codeRange.end.row + 1)
+      if not nextBlockStart?
+        nextBlockStart = [editor.getLineCount() - 1, 0]
+      editor.setCursorScreenPosition(nextBlockStart)
+      editor.moveToFirstCharacterOfLine()
 
     return null
 
