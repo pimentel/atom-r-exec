@@ -44,6 +44,8 @@ module.exports =
       'r-exec:send-function': => @sendFunction()
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:setwd', => @setWorkingDirectory()
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:send-knitr': => @sendKnitr()
 
     # # this is for testing
     # @subscriptions.add atom.commands.add 'atom-workspace',
@@ -249,6 +251,97 @@ module.exports =
       console.error 'No paragraph at cursor.'
       @conditionalWarning("No paragraph at cursor.")
 
+  getGeneralRange: (startFun, endFun) ->
+    # returns a Range with the beginning being the first line of the
+    # knitr block and the end of the knitr block.
+    # if the beginning is not found, the beginning row is -1
+    # if the end is not found, end is editor.getLineCount()
+    editor = atom.workspace.getActiveTextEditor()
+    buffer = editor.getBuffer()
+    currentPosition = editor.getCursorBufferPosition().row
+
+    startIndex = -1
+    for lineIndex in [currentPosition..0]
+      currentLine = buffer.lineForRow(lineIndex)
+      if startFun(currentLine)
+        startIndex = lineIndex
+        break
+
+    endIndex = editor.getLineCount()
+    numberOfLines = editor.getLineCount() - 1
+    for lineIndex in [currentPosition..numberOfLines]
+      currentLine = buffer.lineForRow(lineIndex)
+      if endFun(currentLine)
+        endIndex = lineIndex
+        break
+
+    endColumn = 0
+    if not(endIndex is editor.getLineCount())
+      endColumn = buffer.lineLengthForRow(endIndex)
+
+    return new Range([startIndex, 0], [endIndex, endColumn])
+
+  rMarkdownStart: (line) ->
+    return /^\s*([`]{3})\s*([\{]{0,1})([rR])([^\}]*)([\}]{0,1})\s*$/.test(line)
+
+  rMarkdownEnd: (line) ->
+    return /^\s*([`]{3})\s*$/.test(line)
+
+  sendKnitr: ->
+    editor = atom.workspace.getActiveTextEditor()
+    buffer = editor.getBuffer()
+    codeRange = null
+    fileName = editor.getPath()
+    extension = fileName.split('.').pop()
+    console.log extension
+
+    if /rmd/i.test(extension)
+      codeRange = @getGeneralRange(@rMarkdownStart, @rMarkdownEnd)
+    else if /rnw/i.test(extension)
+      @conditionalWarning("Rnw not implemented yet")
+      return null
+    else
+      @conditionalWarning("File not recognized as knitr.")
+      return null
+
+    whichApp = atom.config.get 'r-exec.whichApp'
+    currentPosition = editor.getCursorBufferPosition().row
+
+    if codeRange.start.row == -1
+      msg = "Couldn't find the beginning of a knitr block."
+      atom.notifications.addError(msg)
+      console.error msg
+      return null
+
+    if codeRange.end.row == editor.getLineCount()
+      msg = "Couldn't find the end of a knitr block."
+      atom.notifications.addError(msg)
+      console.error msg
+      return null
+
+    # ensure that current line is contained in codeRange
+    if not(codeRange.start.row <= currentPosition and
+    currentPosition <= codeRange.end.row)
+      msg = "Couldn't find a knitr block at the current position."
+      atom.notifications.addError(msg)
+      console.error msg
+      return null
+
+    codeRange.start.row += 1
+    codeRange.end.row -= 1
+    codeRange.end.column = buffer.lineLengthForRow(codeRange.end.row)
+
+    # potentially a bug if start and end are on the same line
+    # should also check if start > end
+    code = editor.getTextInBufferRange(codeRange)
+    if not (whichApp == apps.chrome or whichApp == apps.safari)
+      code = code.addSlashes()
+    @sendCode(code, whichApp)
+
+    # TODO: deal with advancePosition
+
+    return null
+
   setWorkingDirectory: ->
     # set the current working directory to the directory of
     # where the current file is
@@ -368,6 +461,8 @@ module.exports =
       if not /RStudio/.test(res)
         # TODO: give a warning if this isn't working
         console.error 'RStudio is not in the title of the window'
+        atom.notifications.addError(
+          'RStudio is not in the title of the browser window')
         return
 
       osascript.execute command, (error, result, raw) ->
