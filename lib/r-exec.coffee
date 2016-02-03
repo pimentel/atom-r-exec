@@ -93,10 +93,10 @@ module.exports =
     advancePosition = atom.config.get 'r-exec.advancePosition'
     if advancePosition and not selection.anySelection
       nextPosition = @_findForward(@nonEmptyLine, currentPosition.row + 1)
-      nextPosition ?= [currentPosition + 1, 0]
-      # currentPosition.row += 1
-      editor.setCursorScreenPosition(nextPosition)
-      editor.moveToFirstCharacterOfLine()
+      if nextPosition?
+        nextPosition ?= [currentPosition + 1, 0]
+        editor.setCursorScreenPosition(nextPosition)
+        editor.moveToFirstCharacterOfLine()
     else
       if not selection.anySelection
         editor.setCursorScreenPosition(currentPosition)
@@ -112,7 +112,7 @@ module.exports =
   getFunctionRange: ->
     # gets the range of the closest function above the cursor.
     # if there is no (proper) function, return false
-    editor = atom.workspace.getActiveTextEditor()
+    [editor, buffer] = @_getEditorAndBuffer()
     currentPosition = editor.getCursorBufferPosition()
     # search for the simple function that looks something like:
     # label <- function(...) {
@@ -160,7 +160,7 @@ module.exports =
       return null
 
   sendFunction: ->
-    editor = atom.workspace.getActiveTextEditor()
+    [editor, buffer] = @_getEditorAndBuffer()
     whichApp = atom.config.get 'r-exec.whichApp'
 
     range = @getFunctionRange()
@@ -183,9 +183,12 @@ module.exports =
 
     if selection.getText().addSlashes() == ""
       anySelection = false
-      editor.selectLinesContainingCursors()
-      selection = editor.getLastSelection()
-    selection = selection.getText()
+      # editor.selectLinesContainingCursors()
+      # selection = editor.getLastSelection()
+      currentPosition = editor.getCursorBufferPosition().row
+      selection = editor.lineTextForBufferRow(currentPosition)
+    else
+      selection = selection.getText()
     if not (whichApp == apps.chrome or whichApp == apps.safari)
       selection = selection.addSlashes()
 
@@ -201,8 +204,7 @@ module.exports =
     return str.replace(/\s/g, '').length is 0
 
   getCurrentParagraphRange: ->
-    editor = atom.workspace.getActiveTextEditor()
-    buffer = editor.getBuffer()
+    [editor, buffer] = @_getEditorAndBuffer()
     currentPosition = editor.getCursorBufferPosition().row
 
     currentLine = buffer.lineForRow(currentPosition)
@@ -237,7 +239,7 @@ module.exports =
 
   sendParagraph: ->
     whichApp = atom.config.get 'r-exec.whichApp'
-    editor = atom.workspace.getActiveTextEditor()
+    [editor, buffer] = @_getEditorAndBuffer()
     # paragraphRange = editor.getCurrentParagraphBufferRange()
     paragraphRange = @getCurrentParagraphRange()
 
@@ -264,8 +266,7 @@ module.exports =
     return line.replace(/\s/g, '').length > 0
 
   _findBackward: (searchFun, startPosition = null) ->
-    editor = atom.workspace.getActiveTextEditor()
-    buffer = editor.getBuffer()
+    [editor, buffer] = @_getEditorAndBuffer()
 
     if not startPosition?
       startPosition = editor.getCursorBufferPosition().row
@@ -292,6 +293,8 @@ module.exports =
 
     index = null
     numberOfLines = editor.getLineCount() - 1
+    if startPosition >= numberOfLines
+      return null
     for lineIndex in [startPosition..numberOfLines]
       currentLine = buffer.lineForRow(lineIndex)
       if searchFun(currentLine)
@@ -322,8 +325,7 @@ module.exports =
     return /^\s*([`]{3})\s*$/.test(line)
 
   sendKnitr: ->
-    editor = atom.workspace.getActiveTextEditor()
-    buffer = editor.getBuffer()
+    [editor, buffer] = @_getEditorAndBuffer()
     codeRange = null
     fileName = editor.getPath()
     extension = fileName.split('.').pop()
@@ -382,9 +384,11 @@ module.exports =
   setWorkingDirectory: ->
     # set the current working directory to the directory of
     # where the current file is
+    [editor, buffer] = @_getEditorAndBuffer()
     whichApp = atom.config.get 'r-exec.whichApp'
+    # TODO: add warning if connected to server
 
-    cwd = atom.workspace.getActiveTextEditor().getPath()
+    cwd = editor.getPath()
     if not cwd
       console.error 'No current working directory (save the file first).'
       @conditionalWarning('No current working directory (save the file first).')
