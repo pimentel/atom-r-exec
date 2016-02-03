@@ -1,3 +1,7 @@
+## 0.4.0 - Fix multiple bugs, re factor ([@pimentel](https://github.com/pimentel))
+- Fix bug when trying to send current line at the end of the file
+
+
 ## 0.3.3 - Send knitr block ([@pimentel](https://github.com/pimentel))
 - Allow user to send a RMarkdown block
 - When sending to server, if the title does not contain 'RStudio', print a error
