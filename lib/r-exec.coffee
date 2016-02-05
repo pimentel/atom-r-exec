@@ -121,8 +121,6 @@ module.exports =
     backwardRange = [0, currentPosition]
     funRegex = new
       RegExp(/[a-zA-Z]+[a-zA-Z0-9_\.]*[\s]*(<-|=)[\s]*(function)[\s]*\(/g)
-    # funRegex = new
-    #   RegExp(/^[a-zA-Z]+[a-zA-Z0-9_\.]*[\s]*(<-|=)[\s]*(function)[^{]*{/g)
     foundStart = null
     editor.backwardsScanInBufferRange funRegex, backwardRange, (result) ->
       if result.range.start.column == 0
@@ -240,7 +238,6 @@ module.exports =
   sendParagraph: ->
     whichApp = atom.config.get 'r-exec.whichApp'
     [editor, buffer] = @_getEditorAndBuffer()
-    # paragraphRange = editor.getCurrentParagraphBufferRange()
     paragraphRange = @getCurrentParagraphRange()
 
     if paragraphRange
@@ -250,11 +247,12 @@ module.exports =
       @sendCode(code, whichApp)
       advancePosition = atom.config.get 'r-exec.advancePosition'
       if advancePosition
-        buffer = editor.getBuffer()
-        # editor.moveToBeginningOfNextParagraph()
-        nextRow = buffer.nextNonBlankRow(paragraphRange.end.row)
-        editor.setCursorScreenPosition([nextRow, 0])
-        editor.moveToFirstCharacterOfLine()
+        currentPosition = editor.getLastSelection().getScreenRange().end
+        nextPosition = @_findForward(@nonEmptyLine, paragraphRange.end.row + 1)
+        if nextPosition?
+          nextPosition ?= [currentPosition + 1, 0]
+          editor.setCursorScreenPosition(nextPosition)
+          editor.moveToFirstCharacterOfLine()
     else
       console.error 'No paragraph at cursor.'
       @conditionalWarning("No paragraph at cursor.")

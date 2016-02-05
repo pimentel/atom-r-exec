@@ -1,6 +1,7 @@
-## 0.3.4 - Fix multiple bugs, re factor ([@pimentel](https://github.com/pimentel))
+## 0.3.4 - Fix multiple bugs, re-factor ([@pimentel](https://github.com/pimentel))
 - Fix bug when trying to send current line at the end of the file
 - Skip comments when advancing lines with `cmd-enter`
+- Skip comments when advancing paragraphs
 
 ## 0.3.3 - Send knitr block ([@pimentel](https://github.com/pimentel))
 - Allow user to send a RMarkdown block
