@@ -263,7 +263,9 @@ module.exports =
     return line.replace(/\s/g, '').length is 0
 
   nonEmptyLine: (line) ->
-    return line.replace(/\s/g, '').length > 0
+    # a non empty line is a line that doesn't contain only a comment
+    # and at least 1 character
+    return not /\s*#/.test(line) and /\S/.test(line)
 
   _findBackward: (searchFun, startPosition = null) ->
     [editor, buffer] = @_getEditorAndBuffer()
