@@ -407,7 +407,7 @@ module.exports =
       command.push 'tell application "iTerm" to activate'
     command.push 'tell application "iTerm"'
     command.push '  tell the current terminal'
-    command.push '    activate current session'
+    # command.push '    activate current session'
     command.push '    tell the last session'
     command.push '      write text code'
     command.push '    end tell'
