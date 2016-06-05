@@ -6,6 +6,7 @@ String::addSlashes = ->
 apps =
   chrome: 'Google Chrome'
   iterm: 'iTerm'
+  iterm2: 'iTerm2'
   rapp: 'R.app'
   safari: 'Safari'
   terminal: 'Terminal'
@@ -14,7 +15,8 @@ module.exports =
   config:
     whichApp:
       type: 'string'
-      enum: [apps.chrome, apps.iterm, apps.rapp, apps.safari, apps.terminal]
+      enum: [apps.chrome, apps.iterm, apps.iterm2, apps.rapp, apps.safari,
+        apps.terminal]
       default: apps.rapp
       description: 'Which application to send code to'
     advancePosition:
@@ -56,6 +58,8 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:set-iterm', => @setIterm()
     @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:set-iterm2', => @setIterm2()
+    @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:set-rapp', => @setRApp()
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:set-safari', => @setSafari()
@@ -69,6 +73,8 @@ module.exports =
     atom.config.set('r-exec.whichApp', apps.chrome)
   setIterm: ->
     atom.config.set('r-exec.whichApp', apps.iterm)
+  setIterm2: ->
+    atom.config.set('r-exec.whichApp', apps.iterm2)
   setRApp: ->
     atom.config.set('r-exec.whichApp', apps.rapp)
   setSafari: ->
@@ -104,6 +110,7 @@ module.exports =
   sendCode: (code, whichApp) ->
     switch whichApp
       when apps.iterm then @iterm(code)
+      when apps.iterm2 then @iterm2(code)
       when apps.rapp then @rapp(code)
       when apps.safari, apps.chrome then @browser(code, whichApp)
       when apps.terminal then @terminal(code)
@@ -407,14 +414,33 @@ module.exports =
       command.push 'tell application "iTerm" to activate'
     command.push 'tell application "iTerm"'
     command.push '  tell the current terminal'
-    # command.push '    activate current session'
+    # if focusWindow
+    #   command.push '    activate current session'
     command.push '    tell the last session'
     command.push '      write text code'
     command.push '    end tell'
     command.push '  end tell'
     command.push 'end tell'
     command = command.join('\n')
+    osascript.execute command, {code: selection}, (error, result, raw) ->
+      if error
+        console.error(error)
 
+  iterm2: (selection) ->
+    # This assumes the active pane item is an console
+    osascript = require 'node-osascript'
+    command = []
+    focusWindow = atom.config.get 'r-exec.focusWindow'
+    if focusWindow
+      command.push 'tell application "iTerm" to activate'
+    command.push 'tell application "iTerm"'
+    command.push '  tell the current window'
+    command.push '    tell current session'
+    command.push '      write text code'
+    command.push '    end tell'
+    command.push '  end tell'
+    command.push 'end tell'
+    command = command.join('\n')
     osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)

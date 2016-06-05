@@ -1,7 +1,7 @@
 {
   "name": "r-exec",
   "main": "./lib/r-exec",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Send R code to various R consoles",
   "activationCommands": {
     "atom-text-editor": [
@@ -12,6 +12,7 @@
       "r-exec:setwd",
       "r-exec:set-chrome",
       "r-exec:set-iterm",
+      "r-exec:set-iterm2",
       "r-exec:set-rapp",
       "r-exec:set-safari",
       "r-exec:set-terminal"

@@ -50,6 +50,12 @@ atom.config.set('r-exec.focusWindow', true)
 atom.config.set('r-exec.notifications', true)
 ```
 
+### Notes about iTerm
+
+The iTerm2 Applescript API recently changed as of version 3.0.0.
+Older versions of iTerm2 (< 3.0.0) are supported using mode `iTerm`.
+Newer versions of iTerm2 (>= 3.0.0) are supported using mode `iTerm2`.
+
 ## Usage
 
 - `cmd-enter`: send code to configured application (`r-exec:whichApp`).

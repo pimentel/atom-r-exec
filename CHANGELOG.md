@@ -1,3 +1,6 @@
+## 0.3.5 - Support for iTerm2 3.0.0 ([@pimentel](https://github.com/pimentel))
+- iTerm2 3.0.0 now supported under mode `iTerm2`. Older versions of iTerm2 are supported under mode `iTerm` due to a recent API change.
+
 ## 0.3.4 - Fix multiple bugs, re-factor ([@pimentel](https://github.com/pimentel))
 - Fix bug when trying to send current line at the end of the file
 - Skip comments when advancing lines with `cmd-enter`

@@ -13,6 +13,7 @@
         'submenu': [
           { 'label': 'Chrome', 'command': 'r-exec:set-chrome'}
           { 'label': 'iTerm', 'command': 'r-exec:set-iterm'}
+          { 'label': 'iTerm2', 'command': 'r-exec:set-iterm2'}
           { 'label': 'R.app', 'command': 'r-exec:set-rapp'}
           { 'label': 'Safari', 'command': 'r-exec:set-safari'}
           { 'label': 'Terminal', 'command': 'r-exec:set-terminal'}
