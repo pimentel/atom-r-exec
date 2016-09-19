@@ -367,7 +367,7 @@ module.exports =
     codeRange.end.row -= 1
     codeRange.end.column = buffer.lineLengthForRow(codeRange.end.row)
 
-    if (codeRange.end.row - codeRange.start.row) <= 0
+    if (codeRange.end.row - codeRange.start.row) < 0
       msg = "Empty knitr block."
       atom.notifications.addError(msg)
       console.error msg
