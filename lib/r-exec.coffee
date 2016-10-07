@@ -35,11 +35,15 @@ module.exports =
 
   subscriptions: null
 
+  previousCommand: ''
+
   activate: (state) ->
     @subscriptions = new CompositeDisposable
 
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:send-command', => @sendCommand()
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:send-previous-command', => @sendPreviousCommand()
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:send-paragraph': => @sendParagraph()
     @subscriptions.add atom.commands.add 'atom-workspace',
@@ -107,7 +111,12 @@ module.exports =
       if not selection.anySelection
         editor.setCursorScreenPosition(currentPosition)
 
+  sendPreviousCommand: ->
+    whichApp = atom.config.get 'r-exec.whichApp'
+    @sendCode(@previousCommand, whichApp)
+
   sendCode: (code, whichApp) ->
+    @previousCommand = code
     switch whichApp
       when apps.iterm then @iterm(code)
       when apps.iterm2 then @iterm2(code)
