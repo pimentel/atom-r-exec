@@ -50,6 +50,14 @@ atom.config.set('r-exec.focusWindow', true)
 atom.config.set('r-exec.notifications', true)
 ```
 
+#### Inserting operators
+
+`r-exec` currently supports inserting the assignment (`<-`) and pipe (`%>%`) operators.
+It tries to be smart by looking if there is whitespace to the left or the right of the cursor.
+If there is already whitespace it will not insert additional whitespace.
+Otherwise, it will insert whitespace.
+This can be disabled in the settings tab (`Smart Insert Operator`).
+
 ### Notes about iTerm
 
 The iTerm2 Applescript API recently changed as of version 3.0.0.

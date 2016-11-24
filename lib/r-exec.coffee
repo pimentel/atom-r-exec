@@ -32,6 +32,10 @@ module.exports =
       type: 'boolean'
       default: true
       description: 'Send notifications if there is an error sending code'
+    smartInsertOperator:
+      type: 'boolean'
+      default: true
+      description: 'Try to be "smart" when inserting operators (see README)'
 
   subscriptions: null
 
@@ -571,15 +575,18 @@ module.exports =
   # XXX: behavior is a bit weird when text is selected.
   # unfortunately, it is unclear how to deal with selections because Atom does not report if there is currently a selection, but only the last selection.
   _smartInsert: (text) ->
+    beSmart = atom.config.get 'r-exec.smartInsertOperator'
+
     [editor, buffer] = @_getEditorAndBuffer()
     # get the character to the left and to the right.
     # if there is whitespace to the left do not insert whitespace
     [left, right] = @_getSurroundingCharacters()
     textInsert = text
-    if left != ' '
+
+    if !beSmart or left != ' '
       textInsert = ' ' + textInsert
 
-    if right != ' '
+    if !beSmart or right != ' '
       textInsert = textInsert + ' '
 
     editor.insertText(textInsert)
