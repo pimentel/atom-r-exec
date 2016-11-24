@@ -16,7 +16,8 @@
       "r-exec:set-rapp",
       "r-exec:set-safari",
       "r-exec:set-terminal",
-      "r-exec:insert-assignment"
+      "r-exec:insert-assignment",
+      "r-exec:insert-pipe"
     ]
   },
   "repository": "https://github.com/pimentel/atom-r-exec",

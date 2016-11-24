@@ -18,4 +18,6 @@
   'shift-cmd-k': 'r-exec:send-knitr'
   'shift-cmd-m': 'r-exec:send-paragraph'
   'alt--': 'r-exec:insert-assignment'
+  'shift-alt-m': 'r-exec:insert-pipe'
+  'shift-alt-p': 'r-exec:send-previous-command'
   # shift-cmd y, u, i, j, k, x, m

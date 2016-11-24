@@ -73,6 +73,9 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:insert-assignment', => @insertAssignment()
 
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:insert-pipe', => @insertPipe()
+
   deactivate: ->
     @subscriptions.dispose()
 
@@ -549,13 +552,7 @@ module.exports =
           console.error(error)
       )
 
-  insertAssignment: ->
-    # behavior:
-    # if there is a whitespace to the left or right, do not insert additional whitespace.
-    # otherwise, insert whitespace.
-    # XXX: behavior is a bit weird when text is selected.
-    # unfortunately, it is unclear how to deal with selections because Atom does not report if there is currently a selection, but only the last selection.
-
+  _getSurroundingCharacters: ->
     [editor, buffer] = @_getEditorAndBuffer()
     # get the character to the left and to the right.
     # if there is whitespace to the left do not insert whitespace
@@ -563,14 +560,32 @@ module.exports =
     leftPosition = Point(currentPosition.row, currentPosition.column - 1)
     rightPosition = Point(currentPosition.row, currentPosition.column + 1)
 
-    leftCharacter = editor.getTextInBufferRange(Range(leftPosition, currentPosition))
-    rightCharacter = editor.getTextInBufferRange(Range(currentPosition, rightPosition))
+    return [
+      editor.getTextInBufferRange(Range(leftPosition, currentPosition)),
+      editor.getTextInBufferRange(Range(currentPosition, rightPosition))
+    ]
 
-    textInsert = '<-'
-    if leftCharacter != ' '
+  # behavior:
+  # if there is a whitespace to the left or right, do not insert additional whitespace.
+  # otherwise, insert whitespace.
+  # XXX: behavior is a bit weird when text is selected.
+  # unfortunately, it is unclear how to deal with selections because Atom does not report if there is currently a selection, but only the last selection.
+  _smartInsert: (text) ->
+    [editor, buffer] = @_getEditorAndBuffer()
+    # get the character to the left and to the right.
+    # if there is whitespace to the left do not insert whitespace
+    [left, right] = @_getSurroundingCharacters()
+    textInsert = text
+    if left != ' '
       textInsert = ' ' + textInsert
 
-    if rightCharacter != ' '
+    if right != ' '
       textInsert = textInsert + ' '
 
     editor.insertText(textInsert)
+
+  insertAssignment: ->
+    @_smartInsert('<-')
+
+  insertPipe: ->
+    @_smartInsert('%>%')
