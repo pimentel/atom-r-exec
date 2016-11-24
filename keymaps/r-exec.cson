@@ -17,4 +17,5 @@
   'shift-cmd-u': 'r-exec:send-function'
   'shift-cmd-k': 'r-exec:send-knitr'
   'shift-cmd-m': 'r-exec:send-paragraph'
+  'alt--': 'r-exec:insert-assignment'
   # shift-cmd y, u, i, j, k, x, m

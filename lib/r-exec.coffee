@@ -70,6 +70,9 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:set-terminal', => @setTerminal()
 
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:insert-assignment', => @insertAssignment()
+
   deactivate: ->
     @subscriptions.dispose()
 
@@ -545,3 +548,29 @@ module.exports =
         if error
           console.error(error)
       )
+
+  insertAssignment: ->
+    # behavior:
+    # if there is a whitespace to the left or right, do not insert additional whitespace.
+    # otherwise, insert whitespace.
+    # XXX: behavior is a bit weird when text is selected.
+    # unfortunately, it is unclear how to deal with selections because Atom does not report if there is currently a selection, but only the last selection.
+
+    [editor, buffer] = @_getEditorAndBuffer()
+    # get the character to the left and to the right.
+    # if there is whitespace to the left do not insert whitespace
+    currentPosition = editor.getCursorBufferPosition()
+    leftPosition = Point(currentPosition.row, currentPosition.column - 1)
+    rightPosition = Point(currentPosition.row, currentPosition.column + 1)
+
+    leftCharacter = editor.getTextInBufferRange(Range(leftPosition, currentPosition))
+    rightCharacter = editor.getTextInBufferRange(Range(currentPosition, rightPosition))
+
+    textInsert = '<-'
+    if leftCharacter != ' '
+      textInsert = ' ' + textInsert
+
+    if rightCharacter != ' '
+      textInsert = textInsert + ' '
+
+    editor.insertText(textInsert)

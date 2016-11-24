@@ -15,7 +15,8 @@
       "r-exec:set-iterm2",
       "r-exec:set-rapp",
       "r-exec:set-safari",
-      "r-exec:set-terminal"
+      "r-exec:set-terminal",
+      "r-exec:insert-assignment"
     ]
   },
   "repository": "https://github.com/pimentel/atom-r-exec",

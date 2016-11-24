@@ -1,3 +1,8 @@
+## 0.4.0 - Fix multiple bugs, send previous command, insert assignment operator ([@pimentel](https://github.com/pimentel))
+- Fixed bug when trying to send 1 line knitr blocks
+- Can now send previous command
+- Now has a 'smart' insert assignment operator ('<\-')
+
 ## 0.3.5 - Support for iTerm2 3.0.0 ([@pimentel](https://github.com/pimentel))
 - iTerm2 3.0.0 now supported under mode `iTerm2`. Older versions of iTerm2 are supported under mode `iTerm` due to a recent API change.
 
