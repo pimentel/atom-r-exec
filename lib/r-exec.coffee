@@ -24,6 +24,11 @@ module.exports =
       default: false
       description: 'Cursor advances to the next line after ' +
         'sending the current line when there is no selection'
+    skipComments:
+      type: 'boolean'
+      default: true
+      description: 'When "advancedPosition" is true, skip lines that contain ' +
+        'only comments'
     focusWindow:
       type: 'boolean'
       default: true
@@ -287,9 +292,13 @@ module.exports =
     return line.replace(/\s/g, '').length is 0
 
   nonEmptyLine: (line) ->
+    skipComments = atom.config.get 'r-exec.skipComments'
+    ret = true
+    if skipComments
+      ret = not /^\s*#/.test(line)
     # a non empty line is a line that doesn't contain only a comment
     # and at least 1 character
-    return not /^\s*#/.test(line) and /\S/.test(line)
+    return ret and /\S/.test(line)
 
   _findBackward: (searchFun, startPosition = null) ->
     [editor, buffer] = @_getEditorAndBuffer()
