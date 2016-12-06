@@ -40,6 +40,10 @@ In your global configuration file (`~/.atom/init.coffee`), you may set the follo
   - if `false`, send the code in the background and stay focused on Atom. This is not possible when sending code to a browser
 - `r-exec.notifications`
   - if `true`, notifications via `NotificationManager` when a paragraph or function is not identified
+- `r-exec.smartInsertOperator`
+  - if `true` when inserting operators, only insert whitespace to the left or right of the operator if there is no existing whitespace.
+- `r-exec.skipComments`
+  - if `true` along with `r-exec.advancePosition`, skip comments after a command is run
 
 The default configuration looks like this:
 
@@ -66,6 +70,8 @@ Newer versions of iTerm2 (>= 3.0.0) are supported using mode `iTerm2`.
 
 ## Usage
 
+### Sending code
+
 - `cmd-enter`: send code to configured application (`r-exec:whichApp`).
 - `shift-cmd-e`: change to current working directory of current file.
 - `shift-cmd-k`: send code between a knitr block (currently only RMarkdown supported).
@@ -76,6 +82,12 @@ myFunction <- function(x) {
 }
 ```
 - `shift-cmd-m`: send paragraph under current cursor. A paragraph is a region enclosed by whitespace.
+- `shift-alt-p`: send the previous command.
+
+### Inserting operators
+
+- `alt--`: insert the assignment operator ` <- `
+- `shift-alt-m`: insert the pipe operator ` %>% `
 
 ## Notes
 
@@ -85,7 +97,7 @@ In the RStudio Server case, the solution is pretty clunky - the code is sent to 
 
 ## TODO
 
-- Make the choice of which R.app to send the code to configurable, based on a project-level configuration variable (sometimes multiple copies of R.app are made so that multiple R GUIs can be running simultaneously for different projects).
-- In RStudio Server case, make sure active window really is RStudio Server before pasting, maybe by checking the  [title](http://www.alfredforum.com/topic/2013-how-to-get-frontmost-tab's-url-and-title-of-various-browsers/).
+~~- Make the choice of which R.app to send the code to configurable, based on a project-level configuration variable (sometimes multiple copies of R.app are made so that multiple R GUIs can be running simultaneously for different projects).~~
+~~- In RStudio Server case, make sure active window really is RStudio Server before pasting, maybe by checking the  [title](http://www.alfredforum.com/topic/2013-how-to-get-frontmost-tab's-url-and-title-of-various-browsers/).~~
 - Error reporting.
 - Support for Windows and Linux.
