@@ -1,3 +1,8 @@
+## 0.4.1 - Fix multiple bugs, skipping comments as option ([@pimentel](https://github.com/pimentel))
+- Additional documentation for 'smart' insert
+- Fixed bug when sending to browser and console not selected
+- Fixed bug when skipping lines with comments
+
 ## 0.4.0 - Fix multiple bugs, send previous command, smart insert operators ([@pimentel](https://github.com/pimentel))
 - Fixed bug when trying to send 1 line knitr blocks
 - Can now send previous command
