@@ -538,7 +538,10 @@ module.exports =
       console.warn '"r-exec.focusWindow" is always set when engine is ' +
         'Safari or Google Chrome'
     command.push 'tell application ' + whichApp + ' to activate'
-    command.push 'delay 0.5'
+    command.push 'delay 0.3'
+    command.push 'tell application "System Events" to tell process ' + whichApp +
+      ' to key code 19 using {control down}'
+    command.push 'delay 0.1'
     command.push 'tell application "System Events" to tell process ' +
       whichApp + ' ' +
       'to keystroke "v" using {command down}'
