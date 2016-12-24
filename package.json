@@ -14,6 +14,7 @@
       "r-exec:set-iterm",
       "r-exec:set-iterm2",
       "r-exec:set-rapp",
+      "r-exec:set-rstudio",
       "r-exec:set-safari",
       "r-exec:set-terminal",
       "r-exec:insert-assignment",

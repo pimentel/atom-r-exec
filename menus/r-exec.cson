@@ -16,6 +16,7 @@
           { 'label': 'iTerm', 'command': 'r-exec:set-iterm'}
           { 'label': 'iTerm2', 'command': 'r-exec:set-iterm2'}
           { 'label': 'R.app', 'command': 'r-exec:set-rapp'}
+          { 'label': 'RStudio', 'command': 'r-exec:set-rstudio'}
           { 'label': 'Safari', 'command': 'r-exec:set-safari'}
           { 'label': 'Terminal', 'command': 'r-exec:set-terminal'}
         ]

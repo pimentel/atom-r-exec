@@ -30,6 +30,7 @@ In your global configuration file (`~/.atom/init.coffee`), you may set the follo
 
 - `r-exec.whichApp` which R application to use. Valid applications are:
   - `R.app`: the default (the R GUI)
+  - `RStudio`: the RStudio console
   - `iTerm` or `Terminal`: Assumes the currently active terminal has R running
   - `Safari` or `Google Chrome`: assumes the currently active tab has an active RStudio session running, with the console active
 - `r-exec.advancePosition`
@@ -91,13 +92,11 @@ myFunction <- function(x) {
 
 ## Notes
 
-This is very much in an **alpha** state and is a quick hobby project.  It is currently Mac-only because these things are easy to do with AppleScript.  Any help on the Windows or Linux side would be great.
+It is currently Mac-only because these things are easy to do with AppleScript.  Any help on the Windows or Linux side would be great.
 
 In the RStudio Server case, the solution is pretty clunky - the code is sent to the clipboard and then a paste command is sent to Safari.  But it works.
 
 ## TODO
 
-~~- Make the choice of which R.app to send the code to configurable, based on a project-level configuration variable (sometimes multiple copies of R.app are made so that multiple R GUIs can be running simultaneously for different projects).~~
-~~- In RStudio Server case, make sure active window really is RStudio Server before pasting, maybe by checking the  [title](http://www.alfredforum.com/topic/2013-how-to-get-frontmost-tab's-url-and-title-of-various-browsers/).~~
 - Error reporting.
 - Support for Windows and Linux.

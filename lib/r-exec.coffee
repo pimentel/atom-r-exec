@@ -8,6 +8,7 @@ apps =
   iterm: 'iTerm'
   iterm2: 'iTerm2'
   rapp: 'R.app'
+  rstudio: 'RStudio'
   safari: 'Safari'
   terminal: 'Terminal'
 
@@ -15,8 +16,8 @@ module.exports =
   config:
     whichApp:
       type: 'string'
-      enum: [apps.chrome, apps.iterm, apps.iterm2, apps.rapp, apps.safari,
-        apps.terminal]
+      enum: [apps.chrome, apps.iterm, apps.iterm2, apps.rapp, apps.rstudio,
+        apps.safari, apps.terminal]
       default: apps.rapp
       description: 'Which application to send code to'
     advancePosition:
@@ -75,6 +76,8 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:set-rapp', => @setRApp()
     @subscriptions.add atom.commands.add 'atom-workspace',
+      'r-exec:set-rstudio', => @setRStudio()
+    @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:set-safari', => @setSafari()
     @subscriptions.add atom.commands.add 'atom-workspace',
       'r-exec:set-terminal', => @setTerminal()
@@ -96,6 +99,8 @@ module.exports =
     atom.config.set('r-exec.whichApp', apps.iterm2)
   setRApp: ->
     atom.config.set('r-exec.whichApp', apps.rapp)
+  setRStudio: ->
+    atom.config.set('r-exec.whichApp', apps.rstudio)
   setSafari: ->
     atom.config.set('r-exec.whichApp', apps.safari)
   setTerminal: ->
@@ -136,6 +141,7 @@ module.exports =
       when apps.iterm then @iterm(code)
       when apps.iterm2 then @iterm2(code)
       when apps.rapp then @rapp(code)
+      when apps.rstudio then @rstudio(code)
       when apps.safari, apps.chrome then @browser(code, whichApp)
       when apps.terminal then @terminal(code)
       else console.error 'r-exec.whichApp "' + whichApp + '" is not supported.'
@@ -480,6 +486,22 @@ module.exports =
     if focusWindow
       command.push 'tell application "R" to activate'
     command.push 'tell application "R" to cmd code'
+    command = command.join('\n')
+
+    osascript.execute command, {code: selection},
+      (error, result, raw) ->
+        if error
+          console.error error
+          console.error 'code: ', selection
+          console.error 'Applescript: ', command
+
+  rstudio: (selection) ->
+    osascript = require 'node-osascript'
+    command = []
+    focusWindow = atom.config.get 'r-exec.focusWindow'
+    if focusWindow
+      command.push 'tell application "RStudio" to activate'
+    command.push 'tell application "RStudio" to cmd code'
     command = command.join('\n')
 
     osascript.execute command, {code: selection},

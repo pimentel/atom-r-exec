@@ -1,3 +1,6 @@
+## 0.4.2 - Add support for RStudio ([@pimentel](https://github.com/pimentel))
+- Add support for RStudio
+
 ## 0.4.1 - Fix multiple bugs, skipping comments as option ([@pimentel](https://github.com/pimentel))
 - Additional documentation for 'smart' insert
 - Fixed bug when sending to browser and console not selected
