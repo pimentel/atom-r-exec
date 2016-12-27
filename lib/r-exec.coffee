@@ -549,9 +549,7 @@ module.exports =
 
   browser: (selection, whichApp) ->
     # This assumes the active pane item is a console
-    atom.clipboard.write selection
     focusWindow = atom.config.get 'r-exec.focusWindow'
-
     osascript = require 'node-osascript'
 
     command = []
@@ -571,6 +569,8 @@ module.exports =
     command.push 'tell application "System Events" to tell process ' +
       whichApp + ' ' +
       'to keystroke return'
+    command.push 'delay 0.1'
+    command.push 'set the clipboard to pc'
     command = command.join('\n')
 
     @getBrowserTitle( (e, res, r) ->
@@ -584,8 +584,9 @@ module.exports =
         atom.notifications.addError(
           'RStudio is not in the title of the browser window')
         return
-
-      osascript.execute command, (error, result, raw) ->
+      previousClipboard = atom.clipboard.read()
+      atom.clipboard.write(selection)
+      osascript.execute command, {pc: previousClipboard}, (error, result, raw) ->
         if error
           console.error(error)
       )
