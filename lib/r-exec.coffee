@@ -42,6 +42,10 @@ module.exports =
       type: 'boolean'
       default: true
       description: 'Try to be "smart" when inserting operators (see README)'
+    clearRStudioConsole:
+      type: 'boolean'
+      default: false
+      description: 'When sending to RStudio, first clear the console'
 
   subscriptions: null
 
@@ -503,6 +507,10 @@ module.exports =
       command.push 'tell application "RStudio" to activate'
     command.push 'tell application "RStudio" to cmd code'
     command = command.join('\n')
+
+    clearRStudioConsole = atom.config.get 'r-exec.clearRStudioConsole'
+    if clearRStudioConsole
+      selection = 'cat("\\f")\n'.addSlashes() + selection
 
     osascript.execute command, {code: selection},
       (error, result, raw) ->
