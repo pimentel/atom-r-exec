@@ -39,6 +39,8 @@ In your global configuration file (`~/.atom/init.coffee`), you may set the follo
 - `r-exec.focusWindow`
   - if `true`, focus the window before sending code
   - if `false`, send the code in the background and stay focused on Atom. This is not possible when sending code to a browser
+- `r-exec.clearRStudioConsole`
+  - if `true` and `whichApp` is set to `RStudio`, the RStudio console will be cleared before sending code
 - `r-exec.notifications`
   - if `true`, notifications via `NotificationManager` when a paragraph or function is not identified
 - `r-exec.smartInsertOperator`
