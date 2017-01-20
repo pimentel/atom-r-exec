@@ -34,6 +34,7 @@
     "atom": ">1.0.0"
   },
   "dependencies": {
-    "node-osascript": "1.0.4"
+    "node-osascript": "1.0.4",
+    "path": "0.12.7"
   }
 }

@@ -142,7 +142,8 @@ module.exports =
       when apps.iterm2 then @iterm2(code)
       when apps.rapp then @rapp(code)
       when apps.rstudio then @rstudio(code)
-      when apps.safari, apps.chrome then @browser(code, whichApp)
+      when apps.safari then @safari(code)
+      when apps.chrome then @browser(code, whichApp)
       when apps.terminal then @terminal(code)
       else console.error 'r-exec.whichApp "' + whichApp + '" is not supported.'
 
@@ -201,7 +202,7 @@ module.exports =
     range = @getFunctionRange()
     if range?
       code = editor.getTextInBufferRange(range)
-      if not (whichApp == apps.chrome or whichApp == apps.safari)
+      if not (whichApp == apps.chrome)
         code = code.addSlashes()
       @sendCode(code, whichApp)
     else
@@ -224,7 +225,7 @@ module.exports =
       selection = editor.lineTextForBufferRow(currentPosition)
     else
       selection = selection.getText()
-    if not (whichApp == apps.chrome or whichApp == apps.safari)
+    if not (whichApp == apps.chrome)
       selection = selection.addSlashes()
 
     {selection: selection, anySelection: anySelection}
@@ -279,7 +280,7 @@ module.exports =
 
     if paragraphRange
       code = editor.getTextInBufferRange(paragraphRange)
-      if not (whichApp == apps.chrome or whichApp == apps.safari)
+      if not (whichApp == apps.chrome)
         code = code.addSlashes()
       @sendCode(code, whichApp)
       advancePosition = atom.config.get 'r-exec.advancePosition'
@@ -408,7 +409,7 @@ module.exports =
       return
 
     code = editor.getTextInBufferRange(codeRange)
-    if not (whichApp == apps.chrome or whichApp == apps.safari)
+    if not (whichApp == apps.chrome)
       code = code.addSlashes()
     @sendCode(code, whichApp)
 
@@ -475,6 +476,8 @@ module.exports =
     command.push '  end tell'
     command.push 'end tell'
     command = command.join('\n')
+    console.log command
+    console.log selection
     osascript.execute command, {code: selection}, (error, result, raw) ->
       if error
         console.error(error)
@@ -546,6 +549,32 @@ module.exports =
 
     command = 'tell application ' + command
     osascript.execute command, callback
+
+  safari: (selection) ->
+    # selection = selection.addSlashes()
+    selection = selection.addSlashes()
+    selection = selection.replace /\n$/, ''
+    selection = selection.replace /\n/g, '\\\\n'
+    console.log selection
+    focusWindow = atom.config.get 'r-exec.focusWindow'
+    osascript = require 'node-osascript'
+    resolve = require('path').resolve
+    # console.log selection
+    osascript.executeFile(
+      resolve(__dirname, 'applescript', 'safari_get_tabs.scpt'),
+      {shouldActivate: focusWindow, incoming: selection},
+      (err, result, raw) ->
+        if err
+          console.error err
+          return
+        if result == 1
+          # intentionally empty
+        else if result == 0
+          atom.notifications.addError('Could not find any RStudio windows.')
+        else
+          atom.notifications.addError('More than one RStudio window open.' +
+            ' Either close all except one or focus the appropriate one.')
+    )
 
   browser: (selection, whichApp) ->
     # This assumes the active pane item is a console
