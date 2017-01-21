@@ -3,18 +3,18 @@
 -- returns 2 if more than 1 window found and a RStudio window is not currently active
 global shouldActivate
 
-on runSafari(code, whichWindow, whichTab)
-	-- code lifted from sublime package:
+on runGoogleChrome(code, whichWindow, whichTab)
+	-- code adapted from sublime package:
 	-- https://github.com/randy3k/SendREPL
-	tell application "Safari"
-		-- tell front window's current tab to do JavaScript "
+  tell application "Google Chrome"
 		if shouldActivate then
 			activate
 			-- having trouble figuring out how to raise the proper tab
 			-- tell window whichWindow to set current tab to whichTab
 			-- set current tab to whichTab
 		end if
-		set cmd to "
+
+    set cmd to "javascript:{" & "
       var input = document.getElementById('rstudio_console_input');
       var textarea = input.getElementsByTagName('textarea')[0];
       textarea.value += \"" & code & "\";
@@ -25,15 +25,16 @@ on runSafari(code, whichWindow, whichTab)
       e.initKeyboardEvent('keydown');
       Object.defineProperty(e, 'keyCode', {'value' : 13});
       input.dispatchEvent(e);
-    "
-		tell tab whichTab of window whichWindow to do JavaScript cmd
-	end tell
-end runSafari
+    " & "}"
 
-tell application "Safari"
-	set currentTabName to name of front document
+    set URL of tab whichTab of window whichWindow to cmd
+  end tell
+end run
+
+tell application "Google Chrome"
+	set currentTabName to title of active tab of front window
 	if (currentTabName is "RStudio") then
-		my runSafari(incoming, 1, index of current tab of window 1)
+    my runGoogleChrome(incoming, 1, active tab index of front window)
 		return 1
 	end if
 
@@ -55,7 +56,7 @@ tell application "Safari"
 
 	if (count of potentialWindows) is 1 then
 		set executeContext to item 1 of potentialWindows
-		my runSafari(incoming, item 1 of executeContext, item 2 of executeContext)
+    my runGoogleChrome(incoming, item 1 of executeContext, item 2 of executeContext)
 		return 1
 	else if (count of potentialWindows) is 0 then
 		return 0

@@ -142,8 +142,8 @@ module.exports =
       when apps.iterm2 then @iterm2(code)
       when apps.rapp then @rapp(code)
       when apps.rstudio then @rstudio(code)
-      when apps.safari then @safari(code)
-      when apps.chrome then @browser(code, whichApp)
+      # when apps.safari then @safari(code)
+      when apps.chrome, apps.safari then @browser(code, whichApp)
       when apps.terminal then @terminal(code)
       else console.error 'r-exec.whichApp "' + whichApp + '" is not supported.'
 
@@ -202,8 +202,7 @@ module.exports =
     range = @getFunctionRange()
     if range?
       code = editor.getTextInBufferRange(range)
-      if not (whichApp == apps.chrome)
-        code = code.addSlashes()
+      code = code.addSlashes()
       @sendCode(code, whichApp)
     else
       @conditionalWarning("Couldn't find function.")
@@ -225,8 +224,7 @@ module.exports =
       selection = editor.lineTextForBufferRow(currentPosition)
     else
       selection = selection.getText()
-    if not (whichApp == apps.chrome)
-      selection = selection.addSlashes()
+    selection = selection.addSlashes()
 
     {selection: selection, anySelection: anySelection}
 
@@ -280,8 +278,7 @@ module.exports =
 
     if paragraphRange
       code = editor.getTextInBufferRange(paragraphRange)
-      if not (whichApp == apps.chrome)
-        code = code.addSlashes()
+      code = code.addSlashes()
       @sendCode(code, whichApp)
       advancePosition = atom.config.get 'r-exec.advancePosition'
       if advancePosition
@@ -409,8 +406,7 @@ module.exports =
       return
 
     code = editor.getTextInBufferRange(codeRange)
-    if not (whichApp == apps.chrome)
-      code = code.addSlashes()
+    code = code.addSlashes()
     @sendCode(code, whichApp)
 
     advancePosition = atom.config.get 'r-exec.advancePosition'
@@ -533,38 +529,30 @@ module.exports =
   getWhichApp: ->
     return atom.config.get 'r-exec.whichApp'
 
-  getBrowserTitle: (callback) ->
-    osascript = require 'node-osascript'
-    whichApp = @getWhichApp()
-    command = switch whichApp
-      when apps.safari
-        '"Safari" to return name of front document'
-      when apps.chrome
-        '"Google Chrome" to return title of active tab of front window'
-      else null
-
-    if not command?
-      @conditionalWarning('whichApp is not a recognized browser.')
-      callback('whichApp is not a recognized browser.')
-
-    command = 'tell application ' + command
-    osascript.execute command, callback
-
-  safari: (selection) ->
-    # selection = selection.addSlashes()
+  browser: (selection, whichApp) ->
     selection = selection.addSlashes()
     selection = selection.replace /\n$/, ''
     selection = selection.replace /\n/g, '\\\\n'
-    console.log selection
+
     focusWindow = atom.config.get 'r-exec.focusWindow'
     osascript = require 'node-osascript'
     resolve = require('path').resolve
-    # console.log selection
+
+    script = ''
+    if whichApp == apps.chrome
+      script = resolve(__dirname, 'applescript', 'chrome-rstudio.applescript')
+    else if whichApp == apps.safari
+      script = resolve(__dirname, 'applescript', 'safari-rstudio.applescript')
+    else
+      atom.notifications.addError('Invalid whichApp for function browser()')
+      return
+
     osascript.executeFile(
-      resolve(__dirname, 'applescript', 'safari_get_tabs.scpt'),
+      script,
       {shouldActivate: focusWindow, incoming: selection},
       (err, result, raw) ->
         if err
+          atom.notifications.addError('AppleScript error. Check developer log.')
           console.error err
           return
         if result == 1
@@ -575,50 +563,6 @@ module.exports =
           atom.notifications.addError('More than one RStudio window open.' +
             ' Either close all except one or focus the appropriate one.')
     )
-
-  browser: (selection, whichApp) ->
-    # This assumes the active pane item is a console
-    focusWindow = atom.config.get 'r-exec.focusWindow'
-    osascript = require 'node-osascript'
-
-    command = []
-    whichApp = '"' + whichApp + '"'
-    if not focusWindow
-      console.warn '"r-exec.focusWindow" is always set when engine is ' +
-        'Safari or Google Chrome'
-    command.push 'tell application ' + whichApp + ' to activate'
-    command.push 'delay 0.3'
-    command.push 'tell application "System Events" to tell process ' + whichApp +
-      ' to key code 19 using {control down}'
-    command.push 'delay 0.1'
-    command.push 'tell application "System Events" to tell process ' +
-      whichApp + ' ' +
-      'to keystroke "v" using {command down}'
-    command.push 'delay 0.1'
-    command.push 'tell application "System Events" to tell process ' +
-      whichApp + ' ' +
-      'to keystroke return'
-    command.push 'delay 0.1'
-    command.push 'set the clipboard to pc'
-    command = command.join('\n')
-
-    @getBrowserTitle( (e, res, r) ->
-      if e
-        console.error e
-        return
-
-      if not /RStudio/.test(res)
-        # TODO: give a warning if this isn't working
-        console.error 'RStudio is not in the title of the window'
-        atom.notifications.addError(
-          'RStudio is not in the title of the browser window')
-        return
-      previousClipboard = atom.clipboard.read()
-      atom.clipboard.write(selection)
-      osascript.execute command, {pc: previousClipboard}, (error, result, raw) ->
-        if error
-          console.error(error)
-      )
 
   _getSurroundingCharacters: ->
     [editor, buffer] = @_getEditorAndBuffer()
