@@ -32,7 +32,7 @@ In your global configuration file (`~/.atom/init.coffee`), you may set the follo
   - `R.app`: the default (the R GUI)
   - `RStudio`: the RStudio console
   - `iTerm` or `Terminal`: Assumes the currently active terminal has R running
-  - `Safari` or `Google Chrome`: assumes the currently active tab has an active RStudio session running, with the console active
+  - `Safari` or `Google Chrome`: assumes the currently active tab has an active RStudio session running or only one session is open
 - `r-exec.advancePosition`
   - if `true`, go to the next line/paragraph after running the current line/paragraph
   - if `false`, leave the cursor where it currently is
@@ -93,8 +93,6 @@ myFunction <- function(x) {
 ## Notes
 
 It is currently Mac-only because these things are easy to do with AppleScript.  Any help on the Windows or Linux side would be great.
-
-In the RStudio Server case, the solution is pretty clunky - the code is sent to the clipboard and then a paste command is sent to Safari.  But it works.
 
 ## TODO
 
