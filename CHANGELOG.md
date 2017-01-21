@@ -1,3 +1,8 @@
+## 0.5.0 - Complete overhaul of Browser commands ([@pimentel](https://github.com/pimentel))
+- Browser commands no longer use copy/paste
+- Browser commands can now send in the background (without raising the application)
+- In browser mode, if the tab is not selected, r-exec will attempt to find the correct tab if only one session exists.
+
 ## 0.4.2 - Add support for RStudio ([@pimentel](https://github.com/pimentel))
 - Add support for RStudio
 

@@ -28,7 +28,7 @@ module.exports =
     skipComments:
       type: 'boolean'
       default: true
-      description: 'When "advancedPosition" is true, skip lines that contain ' +
+      description: 'When "advancePosition" is true, skip lines that contain ' +
         'only comments'
     focusWindow:
       type: 'boolean'
