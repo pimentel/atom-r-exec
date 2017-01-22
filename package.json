@@ -1,7 +1,7 @@
 {
   "name": "r-exec",
   "main": "./lib/r-exec",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Send R code to various R consoles",
   "activationCommands": {
     "atom-text-editor": [
