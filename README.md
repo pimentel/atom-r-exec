@@ -29,30 +29,32 @@ All configuration can be done in the settings panel. Alternatively, you can edit
 In your global configuration file (`~/.atom/init.coffee`), you may set the following variables:
 
 - `r-exec.whichApp` which R application to use. Valid applications are:
-  - `R.app`: the default (the R GUI)
-  - `RStudio`: the RStudio console
-  - `iTerm` or `Terminal`: Assumes the currently active terminal has R running
-  - `Safari` or `Google Chrome`: assumes the currently active tab has an active RStudio session running or only one session is open
+  - `R.app`: the default (the R GUI).
+  - `RStudio`: the RStudio console.
+  - `iTerm` or `Terminal`: Assumes the currently active terminal has R running.
+  - `Safari` or `Google Chrome`: assumes the currently active tab has an active RStudio session running or only one session is open. If the session is not in the active tab, `r-exec` should be able to find it and still send the code. This is helpful if you are viewing plots full screen.
 - `r-exec.advancePosition`
-  - if `true`, go to the next line/paragraph after running the current line/paragraph
+  - if `true`, go to the next line/paragraph after running the current line/paragraph.
   - if `false`, leave the cursor where it currently is
-- `r-exec.focusWindow`
-  - if `true`, focus the window before sending code
-  - if `false`, send the code in the background and stay focused on Atom. This is not possible when sending code to a browser
+- `r-exec.focusWindow`.
+  - if `true`, focus the window before sending code.
+  - if `false`, send the code in the background and stay focused on Atom. This is not possible when sending code to a browser.
 - `r-exec.notifications`
-  - if `true`, notifications via `NotificationManager` when a paragraph or function is not identified
+  - if `true`, notifications via `NotificationManager` when a paragraph or function is not identified.
 - `r-exec.smartInsertOperator`
   - if `true` when inserting operators, only insert whitespace to the left or right of the operator if there is no existing whitespace.
 - `r-exec.skipComments`
-  - if `true` along with `r-exec.advancePosition`, skip comments after a command is run
+  - if `true` along with `r-exec.advancePosition`, skip comments after a command is run.
 
 The default configuration looks like this:
 
 ```javascript
 atom.config.set('r-exec.whichApp', 'R.app')
 atom.config.set('r-exec.advancePosition', false)
+atom.config.set('r-exec.skipComments', true)
 atom.config.set('r-exec.focusWindow', true)
 atom.config.set('r-exec.notifications', true)
+atom.config.set('r-exec.smartInsertOperator', true)
 ```
 
 #### Inserting operators
