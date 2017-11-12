@@ -6,12 +6,13 @@
 # the root workspace element.
 
 # For more detailed documentation see
-# https://atom.io/docs/latest/advanced/keymaps
+# http://flight-manual.atom.io/behind-atom/sections/keymaps-in-depth/
 
 # eventually make it like R-box with cmd-enter
 # and have custom command palette to choose application
 # https://discuss.atom.io/t/custom-use-of-the-command-palette/15702/2
-'atom-text-editor':
+# ---------- Editor --------------
+'atom-text-editor[data-grammar="source r"]:not([mini])':
   'shift-cmd-e': 'r-exec:setwd'
   'cmd-enter': 'r-exec:send-command'
   'shift-cmd-u': 'r-exec:send-function'
@@ -21,3 +22,7 @@
   'shift-alt-m': 'r-exec:insert-pipe'
   'shift-alt-p': 'r-exec:send-previous-command'
   # shift-cmd y, u, i, j, k, x, m
+
+# Override cmd-enter
+'.platform-darwin atom-text-editor[data-grammar="source r"]:not([mini])':
+  'cmd-enter': 'r-exec:send-command'
