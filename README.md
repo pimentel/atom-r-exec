@@ -12,16 +12,6 @@ Search for `r-exec` within package search in the Settings View.
 
 ## Configuration
 
-### Keybindings
-
-While `cmd-enter` is bound to sending code in the package, it is also annoyingly bound to entering a new line by default in atom.
-In order to make it work, you must add the following binding in `~/.atom/keymap.cson`:
-
-```javascript
-'atom-workspace atom-text-editor:not([mini])':
-  'cmd-enter': 'r-exec:send-command'
-```
-
 ### Behavior
 
 All configuration can be done in the settings panel. Alternatively, you can edit your configuration file as noted below.
